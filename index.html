@@ -7,79 +7,90 @@
     <script src="main.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans+TC:wght@100..900&display=swap">
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans+TC:wght@100..900&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 
     <div class="card">
-        <h1>RISO 油墨組合參考 (V2.3)</h1>
+        <h1>RISO 油墨組合參考 (V2.4)</h1>
         
-        <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e4e4e7;">
+        <div class="section-divider">
             <div class="library-layout">
                 <div class="library-main">
                     <div class="ink-section">
-                        <h3 style="font-size: 1rem; color: #64748b; margin-bottom: 0.8rem;">● 使用中的油墨</h3>
+                        <h3 class="ink-section-title active-title">● 使用中的油墨</h3>
                         <div class="ink-library-grid" id="active-inks-display"></div>
                     </div>
                     
                     <div class="add-ink-form">
-                        <strong id="form-title" style="white-space: nowrap;">新增油墨：</strong>
-                        <input type="color" id="form-ink-color" value="#000000" style="width: 35px; height: 35px; border-radius:4px; box-shadow:none;">
+                        <strong id="form-title" class="nowrap-text">新增油墨：</strong>
+                        <input type="color" id="form-ink-color" value="#000000" class="ink-color-picker">
                         <input type="text" id="form-ink-name" placeholder="輸入自訂油墨名稱">
                         <button id="form-btn-submit" onclick="submitInkForm()" class="btn-secondary">加入</button>
-                        <button id="form-btn-cancel" onclick="cancelEdit()" class="btn-secondary" style="display: none;">取消</button>
+                        <button id="form-btn-cancel" onclick="cancelEdit()" class="btn-secondary hidden">取消</button>
                     </div>
                 </div>
 
                 <div class="library-sidebar">
-                    <h3 style="font-size: 1rem; color: #64748b; margin-bottom: 0.8rem;">○ 油墨倉庫（不使用的油墨）</h3>
+                    <h3 class="ink-section-title archive-title">○ 油墨倉庫（不使用的油墨）</h3>
                     <div class="archived-list" id="archived-inks-display"></div>
                 </div>
             </div>
         </div>
 
         <h2>目標色彩設定</h2>
-        <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px; border: 1px dashed #cbd5e1; margin-bottom: 1.5rem; display: flex; gap: 1.5rem; align-items: center;">
+        <div class="file-upload-box">
             <div>
-                <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">從圖片擷取目標色彩</h3>
+                <h3 class="upload-title">從圖片擷取目標色彩</h3>
                 <div class="file-upload-wrapper">
-                    <button class="btn-secondary">📁 選擇圖片檔案</button>
+                    <button class="btn-secondary"><i class="bi bi-folder2-open"></i> 選擇圖片檔案</button>
                     <input type="file" id="image-upload" accept="image/*">
                 </div>
-                <span id="file-name-display" style="font-size: 0.8rem; color: #64748b; margin-left: 0.5rem;">尚未選擇檔案</span>
+                <span id="file-name-display" class="file-name-text">尚未選擇檔案</span>
             </div>
-            <div id="img-preview-container" style="display: none; align-items: center; gap: 1rem;">
-                <canvas id="img-canvas" style="max-height: 80px; border-radius: 4px; border: 1px solid #ccc;"></canvas>
-                <button class="primary" id="extract-btn" onclick="extractDominantColors()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">擷取 5 個目標色</button>
+            <div id="img-preview-container" class="img-preview-box hidden">
+                <canvas id="img-canvas" class="preview-canvas"></canvas>
+                <button class="primary" id="extract-btn" onclick="extractDominantColors()"><i class="bi bi-magic"></i> 擷取 5 個目標色</button>
             </div>
         </div>
         
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-            <p style="margin: 0;">➊ 設定目標色彩</p>
+        <div class="target-header-row">
+            <p class="target-header-text"><i class="bi bi-1-circle-fill"></i> 設定目標色彩</p>
             <div class="target-controls">
-                <button onclick="addTargetColor()" id="btn-add-target" class="btn-secondary">＋ 新增色票</button>
+                <button onclick="addTargetColor()" id="btn-add-target" class="btn-secondary"><i class="bi bi-plus-lg"></i> 新增色票</button>
             </div>
         </div>
         
         <div class="color-row" id="target-colors">
             </div>
 
-        <p>❷ 設定希望使用的 Riso 油墨總數</p>
-        <select id="max-inks" class="ui-select" style="max-width: 200px; margin-bottom: 1.5rem; padding:0.6rem;">
-            <option value="2">2 色</option>
-            <option value="3" selected>3 色</option>
-            <option value="4">4 色</option>
-        </select>
+        <p class="target-header-text mt-4"><i class="bi bi-2-circle-fill"></i> 設定希望使用的 Riso 油墨總數</p>
+        
+        <div class="custom-dropdown limit-width-200 mb-4" id="max-inks-cd">
+            <div class="cd-selected" onclick="toggleDropdown('max-inks-panel')">
+                <span id="max-inks-text" class="cd-text-grow">3 色</span>
+            </div>
+            <div class="cd-panel" id="max-inks-panel">
+                <div class="cd-options">
+                    <div class="cd-option" onclick="selectMaxInks(2, '2 色')"><span>2 色</span></div>
+                    <div class="cd-option" onclick="selectMaxInks(3, '3 色')"><span>3 色</span></div>
+                    <div class="cd-option" onclick="selectMaxInks(4, '4 色')"><span>4 色</span></div>
+                </div>
+            </div>
+            <input type="hidden" id="max-inks-val" value="3">
+        </div>
+        
         <br>
-        <button class="primary" id="calc-btn" onclick="calculateColors()">分析 RISO 油墨組合</button>
+        <button class="primary" id="calc-btn" onclick="calculateColors()">
+            <i class="bi bi-clipboard-data"></i> 分析 RISO 油墨組合
+        </button>
     </div>
 
-    <div class="card" id="result-container" style="display: none;">
+    <div class="card hidden" id="result-container">
         <h2>RISO 油墨組合</h2>
-        <div id="chosen-inks-container" style="margin-bottom: 1.5rem;">
+        <div id="chosen-inks-container" class="mb-4">
             </div>
         <div id="results"></div>
     </div>

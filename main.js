@@ -16,18 +16,25 @@ let RISO_INKS = [
     { name: "螢光綠", hex: "#79fd83", active: true }, { name: "螢光黃", hex: "#fdff78", active: true }
 ];
 
-let editingIndex = -1;
+// 效能優化 1: 預先計算所有油墨的 RGB 與 CMY 值，避免在迴圈內重複 Parse
+function computeInkProperties(ink) {
+    let bigint = parseInt(ink.hex.replace('#', ''), 16);
+    ink.r = (bigint >> 16) & 255;
+    ink.g = (bigint >> 8) & 255;
+    ink.b = bigint & 255;
+    ink.c = 1 - ink.r / 255;
+    ink.m = 1 - ink.g / 255;
+    ink.y = 1 - ink.b / 255;
+}
+RISO_INKS.forEach(computeInkProperties);
 
-// 使用 Array 來管理目標色票的狀態，上限 20 個
+let editingIndex = -1;
 let targetColorStates = [
-    { hex: "#005b4b", limit: 0, forceInk: "" },
-    { hex: "#a52a2a", limit: 0, forceInk: "" },
-    { hex: "#4682b4", limit: 0, forceInk: "" },
-    { hex: "#32cd32", limit: 0, forceInk: "" },
+    { hex: "#005b4b", limit: 0, forceInk: "" }, { hex: "#a52a2a", limit: 0, forceInk: "" },
+    { hex: "#4682b4", limit: 0, forceInk: "" }, { hex: "#32cd32", limit: 0, forceInk: "" },
     { hex: "#ffa500", limit: 0, forceInk: "" }
 ];
 
-// 把當前 DOM 的設定存回 Array，避免重新渲染時資料遺失
 function saveTargetStates() {
     targetColorStates.forEach((t, i) => {
         const box = document.getElementById(`target-box-${i}`);
@@ -41,12 +48,12 @@ function saveTargetStates() {
 
 function updateExtractBtnText() {
     const extractBtn = document.getElementById('extract-btn');
-    if(extractBtn) extractBtn.innerText = `擷取 ${targetColorStates.length} 個目標色`;
+    if(extractBtn) extractBtn.innerHTML = `<i class="bi bi-magic"></i> 擷取 ${targetColorStates.length} 個目標色`;
 }
 
 function addTargetColor() {
     if (targetColorStates.length >= 20) return alert("最多只能設定 20 個目標色！");
-    saveTargetStates(); // 先存檔
+    saveTargetStates();
     targetColorStates.push({ hex: "#000000", limit: 0, forceInk: "" });
     renderTargetBoxes();
     updateExtractBtnText();
@@ -54,7 +61,7 @@ function addTargetColor() {
 
 function removeTargetColor(index) {
     if (targetColorStates.length <= 1) return alert("最少需要保留 1 個目標色！");
-    saveTargetStates(); // 先存檔
+    saveTargetStates(); 
     targetColorStates.splice(index, 1);
     renderTargetBoxes();
     updateExtractBtnText();
@@ -73,13 +80,13 @@ function renderTargetBoxes() {
     targetColorStates.forEach((t, i) => {
         container.innerHTML += `
             <div class="color-box" id="target-box-${i}">
-                <button class="btn-delete-box" onclick="removeTargetColor(${i})" title="刪除此色票">✖</button>
+                <button class="btn-delete-box" onclick="removeTargetColor(${i})" title="刪除此色票"><i class="bi bi-x"></i></button>
                 <input type="color" value="${t.hex}" class="target-hex">
                 <label style="font-weight:bold; font-size:0.9rem;">色票 ${i+1}</label>
                 
                 <div class="custom-dropdown" id="limit-cd-${i}">
                     <div class="cd-selected" onclick="toggleDropdown('limit-panel-${i}')">
-                        <span id="limit-text-${i}" style="flex-grow:1; text-align:left;">${getLimitText(t.limit)}</span>
+                        <span id="limit-text-${i}" class="cd-text-grow">${getLimitText(t.limit)}</span>
                     </div>
                     <div class="cd-panel" id="limit-panel-${i}">
                         <div class="cd-options">
@@ -94,14 +101,13 @@ function renderTargetBoxes() {
                 <div class="custom-dropdown" id="ink-cd-${i}">
                     <div class="cd-selected" onclick="toggleDropdown('ink-panel-${i}', true)">
                         <div class="cd-swatch cd-none-swatch" id="ink-swatch-${i}"></div>
-                        <span id="ink-text-${i}" style="flex-grow:1; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">（不指定）</span>
+                        <span id="ink-text-${i}" class="cd-text-truncate">（不指定）</span>
                     </div>
                     <div class="cd-panel" id="ink-panel-${i}">
                         <div class="cd-search-box">
                             <input type="text" placeholder="搜尋油墨..." onkeyup="filterDropdown(${i}, this.value)" onclick="event.stopPropagation()">
                         </div>
-                        <div class="cd-options" id="ink-options-${i}">
-                            </div>
+                        <div class="cd-options" id="ink-options-${i}"></div>
                     </div>
                     <input type="hidden" class="target-force-val" id="ink-val-${i}" value="${t.forceInk}">
                 </div>
@@ -115,11 +121,10 @@ function toggleDropdown(panelId, focusSearch = false) {
     document.querySelectorAll('.cd-panel').forEach(p => {
         if(p.id !== panelId) p.classList.remove('show');
     });
-    
     const panel = document.getElementById(panelId);
-    panel.classList.toggle('show');
+    if(panel) panel.classList.toggle('show');
     
-    if(panel.classList.contains('show') && focusSearch) {
+    if(panel && panel.classList.contains('show') && focusSearch) {
         const searchInput = panel.querySelector('input[type="text"]');
         if (searchInput) {
             searchInput.value = '';
@@ -151,8 +156,13 @@ function selectInk(boxIndex, inkName, inkHex) {
         swatchDiv.style.background = 'transparent';
         swatchDiv.classList.add('cd-none-swatch');
     }
-    
     document.getElementById(`ink-panel-${boxIndex}`).classList.remove('show');
+}
+
+function selectMaxInks(val, text) {
+    document.getElementById('max-inks-val').value = val;
+    document.getElementById('max-inks-text').innerText = text;
+    document.getElementById('max-inks-panel').classList.remove('show');
 }
 
 function filterDropdown(boxIndex, keyword) {
@@ -181,19 +191,15 @@ function renderInkLibrary() {
             <div class="ink-badge ${ink.active ? '' : 'archived'}">
                 <div class="ink-badge-color" style="background: ${ink.hex};"></div>
                 <span style="font-weight:500;">${ink.name}</span>
-                <button class="btn-icon" onclick="editInk(${index})" title="編輯">✎</button>
+                <button class="btn-icon" onclick="editInk(${index})" title="編輯"><i class="bi bi-pencil-fill"></i></button>
                 <button class="btn-icon" onclick="toggleInk(${index})" title="${ink.active ? '移入倉庫' : '啟用'}">
-                    ${ink.active ? '✖' : '＋'}
+                    <i class="bi ${ink.active ? 'bi-x-lg' : 'bi-plus-lg'}"></i>
                 </button>
             </div>
         `;
-        if (ink.active) {
-            activeContainer.innerHTML += badgeHTML;
-        } else {
-            archivedContainer.innerHTML += badgeHTML;
-        }
+        if (ink.active) activeContainer.innerHTML += badgeHTML;
+        else archivedContainer.innerHTML += badgeHTML;
     });
-    
     updateTargetDropdowns();
 }
 
@@ -205,12 +211,7 @@ function updateTargetDropdowns() {
         if(!optionsContainer) continue; 
 
         const currentVal = document.getElementById(`ink-val-${i}`).value;
-        
-        let html = `
-            <div class="cd-option" onclick="selectInk(${i}, '', '')">
-                <span>（不指定）</span>
-            </div>
-        `;
+        let html = `<div class="cd-option" onclick="selectInk(${i}, '', '')"><span>（不指定）</span></div>`;
         
         activeInks.forEach(ink => {
             html += `
@@ -245,7 +246,7 @@ function editInk(index) {
     const submitBtn = document.getElementById('form-btn-submit');
     submitBtn.innerText = '儲存';
     submitBtn.classList.add('btn-save');
-    document.getElementById('form-btn-cancel').style.display = 'inline-block';
+    document.getElementById('form-btn-cancel').classList.remove('hidden');
 }
 
 function cancelEdit() {
@@ -255,7 +256,7 @@ function cancelEdit() {
     const submitBtn = document.getElementById('form-btn-submit');
     submitBtn.innerText = '加入';
     submitBtn.classList.remove('btn-save');
-    document.getElementById('form-btn-cancel').style.display = 'none';
+    document.getElementById('form-btn-cancel').classList.add('hidden');
 }
 
 function submitInkForm() {
@@ -267,9 +268,12 @@ function submitInkForm() {
     if (editingIndex >= 0) {
         RISO_INKS[editingIndex].name = name;
         RISO_INKS[editingIndex].hex = hex;
+        computeInkProperties(RISO_INKS[editingIndex]);
         cancelEdit();
     } else {
-        RISO_INKS.push({ name: name, hex: hex, active: true });
+        let newInk = { name: name, hex: hex, active: true };
+        computeInkProperties(newInk);
+        RISO_INKS.push(newInk);
         document.getElementById('form-ink-name').value = '';
     }
     renderInkLibrary();
@@ -287,12 +291,9 @@ function hexToRgb(hex) {
     return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
 }
 
-// 亮度對比度演算法 (YIQ)，決定長條圖上的文字該用黑色還是白色
 function getContrastYIQ(hexcolor){
     hexcolor = hexcolor.replace("#", "");
-    if(hexcolor.length === 3) {
-        hexcolor = hexcolor.split('').map(x => x+x).join('');
-    }
+    if(hexcolor.length === 3) hexcolor = hexcolor.split('').map(x => x+x).join('');
     let r = parseInt(hexcolor.substr(0,2),16);
     let g = parseInt(hexcolor.substr(2,2),16);
     let b = parseInt(hexcolor.substr(4,2),16);
@@ -300,12 +301,14 @@ function getContrastYIQ(hexcolor){
     return (yiq >= 128) ? 'black' : 'white';
 }
 
-function mixInks(inks, weights) {
+// 效能優化 2: 採用預先算好的 CMY 值，避免數學轉換
+function mixInksOptimized(inks, weights) {
     let c=0, m=0, y=0;
     for(let i=0; i<inks.length; i++) {
-        let rgb = hexToRgb(inks[i].hex);
-        let ic = 1 - rgb.r/255, im = 1 - rgb.g/255, iy = 1 - rgb.b/255;
-        c += ic * weights[i]; m += im * weights[i]; y += iy * weights[i];
+        let w = weights[i];
+        c += inks[i].c * w;
+        m += inks[i].m * w;
+        y += inks[i].y * w;
     }
     return {
         r: Math.round(Math.max(0, 1 - Math.min(1, c)) * 255),
@@ -314,8 +317,12 @@ function mixInks(inks, weights) {
     };
 }
 
-function colorDistance(c1, c2) {
-    return Math.sqrt(Math.pow(c1.r - c2.r, 2) + Math.pow(c1.g - c2.g, 2) + Math.pow(c1.b - c2.b, 2));
+// 效能優化 3: 採用平方差比較，省去耗時的 Math.sqrt
+function colorDistSq(c1, c2) {
+    let dr = c1.r - c2.r;
+    let dg = c1.g - c2.g;
+    let db = c1.b - c2.b;
+    return dr*dr + dg*dg + db*db;
 }
 
 function getCombinations(arr, k) {
@@ -347,8 +354,8 @@ function findBestWeightsForTarget(target, inkCombo) {
                     const forceInkIndex = inkCombo.findIndex(i => i.name === target.forceInk);
                     if (currentWeights[forceInkIndex] === 0) return;
                 }
-                let mixed = mixInks(inkCombo, currentWeights);
-                let dist = colorDistance(target.rgb, mixed);
+                let mixed = mixInksOptimized(inkCombo, currentWeights);
+                let dist = colorDistSq(target.rgb, mixed);
                 if (dist < bestDist) {
                     bestDist = dist;
                     bestWeights = [...currentWeights];
@@ -387,53 +394,53 @@ function findBestWeightsForTarget(target, inkCombo) {
     return runSearchPhase(fineStepArrays);
 }
 
+// 效能優化 4: 異步分塊運算 (Chunking) 防止畫面卡死並支援動畫
 function calculateColors() {
     const btn = document.getElementById('calc-btn');
-    const originalText = btn.innerText;
-    btn.innerText = "運算中... (請耐心等候)";
-    btn.disabled = true;
-    
-    // 計算前存檔，確保最新設定生效
     saveTargetStates();
 
-    setTimeout(() => {
-        const targets = [];
-        for(let i=0; i < targetColorStates.length; i++) {
-            const box = document.getElementById(`target-box-${i}`);
-            targets.push({
-                rgb: hexToRgb(box.querySelector('.target-hex').value),
-                limit: parseInt(box.querySelector('.target-limit-val').value),
-                forceInk: box.querySelector('.target-force-val').value 
-            });
-        }
+    const targets = [];
+    for(let i=0; i < targetColorStates.length; i++) {
+        const box = document.getElementById(`target-box-${i}`);
+        targets.push({
+            rgb: hexToRgb(box.querySelector('.target-hex').value),
+            limit: parseInt(box.querySelector('.target-limit-val').value),
+            forceInk: box.querySelector('.target-force-val').value 
+        });
+    }
 
-        const maxInks = parseInt(document.getElementById('max-inks').value);
-        const activeInksData = RISO_INKS.filter(ink => ink.active);
+    const maxInks = parseInt(document.getElementById('max-inks-val').value);
+    const activeInksData = RISO_INKS.filter(ink => ink.active);
 
-        const forcedInksSet = new Set(targets.map(t => t.forceInk).filter(name => name !== ""));
-        if (forcedInksSet.size > maxInks) {
-            alert(`衝突：你總共允許 ${maxInks} 色，但各色票卻強制綁定了 ${forcedInksSet.size} 種不同油墨。`);
-            btn.innerText = originalText;
-            btn.disabled = false;
-            return;
-        }
+    const forcedInksSet = new Set(targets.map(t => t.forceInk).filter(name => name !== ""));
+    if (forcedInksSet.size > maxInks) {
+        return alert(`衝突：你總共允許 ${maxInks} 色，但各色票卻強制綁定了 ${forcedInksSet.size} 種不同油墨。`);
+    }
 
-        const combos = getCombinations(activeInksData, maxInks);
-        let globalBestScore = Infinity;
-        let globalBestCombo = null;
-        let globalBestResults = null;
+    const combos = getCombinations(activeInksData, maxInks);
+    let globalBestScore = Infinity;
+    let globalBestCombo = null;
+    let globalBestResults = null;
 
-        for (let combo of combos) {
+    // UI 動畫啟動
+    btn.innerHTML = `<i class="bi bi-arrow-repeat spin-anim"></i> 運算中... (0%)`;
+    btn.disabled = true;
+
+    let comboIndex = 0;
+    const CHUNK_SIZE = 500; // 每處理 500 個組合，休息一次讓 UI 更新
+
+    function processChunk() {
+        let end = Math.min(comboIndex + CHUNK_SIZE, combos.length);
+        
+        for (; comboIndex < end; comboIndex++) {
+            let combo = combos[comboIndex];
             let totalDist = 0;
             let comboResults = [];
             let isValidCombo = true;
             
             for (let target of targets) {
                 let res = findBestWeightsForTarget(target, combo);
-                if (res.dist === Infinity) {
-                    isValidCombo = false; 
-                    break; 
-                }
+                if (res.dist === Infinity) { isValidCombo = false; break; }
                 totalDist += res.dist;
                 comboResults.push(res);
             }
@@ -445,26 +452,44 @@ function calculateColors() {
             }
         }
 
-        if (globalBestCombo) {
-            renderResults(targets, globalBestCombo, globalBestResults);
+        if (comboIndex < combos.length) {
+            // 還沒算完，更新進度並排程下一批
+            let pct = Math.floor((comboIndex / combos.length) * 100);
+            btn.innerHTML = `<i class="bi bi-arrow-repeat spin-anim"></i> 運算中... (${pct}%)`;
+            requestAnimationFrame(() => setTimeout(processChunk, 0));
         } else {
-            alert("找不到符合所有限制條件的油墨組合。");
+            // 算完了
+            if (globalBestCombo) {
+                renderResults(targets, globalBestCombo, globalBestResults);
+            } else {
+                alert("找不到符合所有限制條件的油墨組合。");
+            }
+            
+            // 完成動畫
+            btn.innerHTML = `<i class="bi bi-check-lg"></i> 已完成`;
+            btn.classList.add('btn-success');
+            
+            setTimeout(() => {
+                btn.innerHTML = `<i class="bi bi-cpu"></i> 分析 RISO 油墨組合`;
+                btn.classList.remove('btn-success');
+                btn.disabled = false;
+            }, 1500);
         }
-        
-        btn.innerText = originalText;
-        btn.disabled = false;
-    }, 50); 
+    }
+    
+    // 開始第一批運算
+    processChunk();
 }
 
 function renderResults(targets, combo, results) {
-    document.getElementById('result-container').style.display = 'block';
+    const resultContainer = document.getElementById('result-container');
+    resultContainer.classList.remove('hidden');
     
-    // 更新選用油墨標籤 (採用 Badge 樣式)
     const container = document.getElementById('chosen-inks-container');
-    let badgesHTML = '<strong style="display:block; margin-bottom:0.8rem; color:#475569;">選用油墨組合：</strong>';
-    badgesHTML += '<div style="display:flex; gap:0.5rem; flex-wrap:wrap;">';
+    let badgesHTML = '<strong class="result-summary-title">選用油墨組合：</strong>';
+    badgesHTML += '<div class="result-badge-container">';
     badgesHTML += combo.map(i => `
-        <div class="ink-badge" style="background:white; box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+        <div class="ink-badge result-ink-badge">
             <div class="ink-badge-color" style="background: ${i.hex};"></div>
             <span style="font-weight:600;">${i.name}</span>
         </div>`).join('');
@@ -488,19 +513,18 @@ function renderResults(targets, combo, results) {
                 <div class="compare-row">
                     <div>
                         <div class="preview-swatch" style="background: ${targetHex};"></div>
-                        <div style="font-size: 0.8rem; text-align:center; margin-top:6px; font-weight:600;">目標色 ${index+1} <br><span style="color:#64748b; font-size:0.75rem; font-weight:normal;">${constraintText}</span></div>
+                        <div class="preview-label">目標色 ${index+1} <br><span class="preview-sub-label">${constraintText}</span></div>
                     </div>
                     <div>
                         <div class="preview-swatch" style="background: ${mixedHex};"></div>
-                        <div style="font-size: 0.8rem; text-align:center; margin-top:6px; font-weight:600;">模擬疊印</div>
+                        <div class="preview-label">模擬疊印</div>
                     </div>
-                    <div style="flex-grow: 1; padding-left: 1rem;">
+                    <div class="bar-chart-container">
         `;
 
         combo.forEach((ink, idx) => {
             let pct = Math.round(r.weights[idx] * 100);
             if(pct > 0) {
-                // 自動判斷長條圖文字顏色對比
                 let textColor = getContrastYIQ(ink.hex);
                 itemHTML += `
                     <div class="result-bar-row">
@@ -520,9 +544,7 @@ function renderResults(targets, combo, results) {
     });
 }
 
-
 // ==================== 圖片色彩擷取功能 ====================
-
 document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('image-upload');
     const fileNameDisplay = document.getElementById('file-name-display');
@@ -532,7 +554,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const file = e.target.files[0];
             if (!file) {
                 fileNameDisplay.innerText = "尚未選擇檔案";
-                document.getElementById('img-preview-container').style.display = 'none';
+                document.getElementById('img-preview-container').classList.add('hidden');
                 return;
             }
             
@@ -557,7 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     canvas.width = width;
                     canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
-                    document.getElementById('img-preview-container').style.display = 'flex';
+                    document.getElementById('img-preview-container').classList.remove('hidden');
                 };
                 img.src = event.target.result;
             };
@@ -568,11 +590,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function extractDominantColors() {
     const btn = document.getElementById('extract-btn');
-    const originalText = btn.innerText;
-    btn.innerText = "分析中...";
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<i class="bi bi-arrow-repeat spin-anim"></i> 分析中...`;
     btn.disabled = true;
 
-    // 動態讀取當前的目標色彩數量 (Max 20)
     const k = targetColorStates.length; 
 
     setTimeout(() => {
@@ -596,15 +617,11 @@ function extractDominantColors() {
             const bBin = Math.floor(p.b / binSize) * binSize + Math.floor(binSize/2);
             const key = `${rBin},${gBin},${bBin}`;
 
-            if (colorMap.has(key)) {
-                colorMap.get(key).count++;
-            } else {
-                colorMap.set(key, { r: rBin, g: gBin, b: bBin, count: 1 });
-            }
+            if (colorMap.has(key)) colorMap.get(key).count++;
+            else colorMap.set(key, { r: rBin, g: gBin, b: bBin, count: 1 });
         }
 
         const sortedColors = Array.from(colorMap.values()).sort((a, b) => b.count - a.count);
-
         let centroids = [];
         let minDistThreshold = 12000; 
 
@@ -617,16 +634,16 @@ function extractDominantColors() {
                 let isDistinct = true;
 
                 for (let selected of centroids) {
-                    const sqDist = Math.pow(candidate.r - selected.r, 2) + 
-                                   Math.pow(candidate.g - selected.g, 2) + 
-                                   Math.pow(candidate.b - selected.b, 2);
+                    let dr = candidate.r - selected.r;
+                    let dg = candidate.g - selected.g;
+                    let db = candidate.b - selected.b;
+                    let sqDist = dr*dr + dg*dg + db*db;
                     
                     if (sqDist < minDistThreshold) {
                         isDistinct = false; 
                         break;
                     }
                 }
-
                 if (isDistinct) centroids.push(candidate);
             }
             minDistThreshold -= 1500; 
@@ -640,7 +657,6 @@ function extractDominantColors() {
            }
         }
 
-        // 更新色票並存入 State Array
         centroids.forEach((c, index) => {
             const r = Math.min(255, Math.max(0, Math.round(c.r)));
             const g = Math.min(255, Math.max(0, Math.round(c.g)));
@@ -652,14 +668,12 @@ function extractDominantColors() {
                 box.querySelector('.target-hex').value = hex;
                 box.style.transition = "background-color 0.3s";
                 box.style.backgroundColor = "#dcfce7"; 
-                setTimeout(() => box.style.backgroundColor = "#f8fafc", 300);
+                setTimeout(() => box.style.backgroundColor = "", 300);
             }
         });
         
-        // 將分析結果同步存入陣列，避免被其他操作洗掉
         saveTargetStates();
-
-        btn.innerText = originalText;
+        btn.innerHTML = originalText;
         btn.disabled = false;
     }, 50);
 }
