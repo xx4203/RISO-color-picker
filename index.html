@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>RISO 油墨組合參考</title>
+    <link rel="stylesheet" href="main.css">
+    <script src="main.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans+TC:wght@100..900&display=swap">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+</head>
+<body>
+
+    <div class="card">
+        <h1>RISO 油墨組合參考 (V2.3)</h1>
+        
+        <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e4e4e7;">
+            <div class="library-layout">
+                <div class="library-main">
+                    <div class="ink-section">
+                        <h3 style="font-size: 1rem; color: #64748b; margin-bottom: 0.8rem;">● 使用中的油墨</h3>
+                        <div class="ink-library-grid" id="active-inks-display"></div>
+                    </div>
+                    
+                    <div class="add-ink-form">
+                        <strong id="form-title" style="white-space: nowrap;">新增油墨：</strong>
+                        <input type="color" id="form-ink-color" value="#000000" style="width: 35px; height: 35px; border-radius:4px; box-shadow:none;">
+                        <input type="text" id="form-ink-name" placeholder="輸入自訂油墨名稱">
+                        <button id="form-btn-submit" onclick="submitInkForm()" class="btn-secondary">加入</button>
+                        <button id="form-btn-cancel" onclick="cancelEdit()" class="btn-secondary" style="display: none;">取消</button>
+                    </div>
+                </div>
+
+                <div class="library-sidebar">
+                    <h3 style="font-size: 1rem; color: #64748b; margin-bottom: 0.8rem;">○ 油墨倉庫（不使用的油墨）</h3>
+                    <div class="archived-list" id="archived-inks-display"></div>
+                </div>
+            </div>
+        </div>
+
+        <h2>目標色彩設定</h2>
+        <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px; border: 1px dashed #cbd5e1; margin-bottom: 1.5rem; display: flex; gap: 1.5rem; align-items: center;">
+            <div>
+                <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">從圖片擷取目標色彩</h3>
+                <div class="file-upload-wrapper">
+                    <button class="btn-secondary">📁 選擇圖片檔案</button>
+                    <input type="file" id="image-upload" accept="image/*">
+                </div>
+                <span id="file-name-display" style="font-size: 0.8rem; color: #64748b; margin-left: 0.5rem;">尚未選擇檔案</span>
+            </div>
+            <div id="img-preview-container" style="display: none; align-items: center; gap: 1rem;">
+                <canvas id="img-canvas" style="max-height: 80px; border-radius: 4px; border: 1px solid #ccc;"></canvas>
+                <button class="primary" id="extract-btn" onclick="extractDominantColors()" style="padding: 0.5rem 1rem; font-size: 0.9rem;">擷取 5 個目標色</button>
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <p style="margin: 0;">➊ 設定目標色彩</p>
+            <div class="target-controls">
+                <button onclick="addTargetColor()" id="btn-add-target" class="btn-secondary">＋ 新增色票</button>
+            </div>
+        </div>
+        
+        <div class="color-row" id="target-colors">
+            </div>
+
+        <p>❷ 設定希望使用的 Riso 油墨總數</p>
+        <select id="max-inks" class="ui-select" style="max-width: 200px; margin-bottom: 1.5rem; padding:0.6rem;">
+            <option value="2">2 色</option>
+            <option value="3" selected>3 色</option>
+            <option value="4">4 色</option>
+        </select>
+        <br>
+        <button class="primary" id="calc-btn" onclick="calculateColors()">分析 RISO 油墨組合</button>
+    </div>
+
+    <div class="card" id="result-container" style="display: none;">
+        <h2>RISO 油墨組合</h2>
+        <div id="chosen-inks-container" style="margin-bottom: 1.5rem;">
+            </div>
+        <div id="results"></div>
+    </div>
+</body>
+</html>

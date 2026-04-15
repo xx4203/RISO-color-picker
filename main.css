@@ -1,0 +1,70 @@
+* {font-family: "Montserrat", "Noto Sans TC", sans-serif; }
+
+body { font-family: system-ui, sans-serif; background: #f4f4f5; color: #333; max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+.card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+h1, h2, h3 { margin-top: 0; }
+
+/* 版面配置：油墨庫 */
+.library-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+.library-main { display: flex; flex-direction: column; justify-content: space-between;}
+.library-sidebar { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; }
+
+.ink-library-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; align-content: flex-start; }
+.archived-list { display: flex; flex-direction: column; gap: 0.5rem; overflow-y: auto; padding-right: 0.5rem; flex-grow: 1; max-height: 300px;}
+
+.ink-badge { display: inline-flex; align-items: center; gap: 0.35rem; background: #f1f5f9; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.85rem; transition: 0.2s; }
+.ink-badge.archived { background: white; opacity: 0.7; border-style: dashed; }
+.ink-badge-color { width: 16px; height: 16px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); flex-shrink: 0;}
+.btn-icon { background: none; border: none; cursor: pointer; font-size: 0.9rem; padding: 0 0.2rem; color: #64748b; margin-left: auto; }
+.btn-icon:hover { color: #000; }
+
+/* 新增油墨表單與次要按鈕 */
+.add-ink-form { display: flex; gap: 0.5rem; align-items: center; background: #f1f5f9; padding: 1rem; border-radius: 8px; margin-top: 1.5rem; }
+.add-ink-form input[type="text"] { padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9rem; flex-grow: 1; }
+.btn-secondary { background: white; border: 1px solid #cbd5e1; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: 0.2s; color: #333; font-weight: 500;}
+.btn-secondary:hover { background: #f8fafc; border-color: #94a3b8; }
+.add-ink-form .btn-save { background: #10b981; color: white; border: none; }
+.add-ink-form .btn-save:hover { background: #059669; }
+
+/* 檔案上傳客製化 UI */
+.file-upload-wrapper { position: relative; display: inline-block; overflow: hidden; vertical-align: middle; }
+.file-upload-wrapper input[type="file"] { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; width: 100%; }
+
+/* 目標色彩設定區 */
+.color-row { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; justify-content: flex-start; }
+.color-box { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.8rem; background: #f8fafc; padding: 1.8rem 1rem 1.5rem 1rem; border-radius: 8px; border: 1px solid #e2e8f0; width: 15%; min-width: 140px; box-sizing: border-box; flex-grow: 1; max-width: 20%;}
+.btn-delete-box { position: absolute; top: 0.4rem; right: 0.4rem; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 1.1rem; line-height: 1; padding: 0.2rem; border-radius: 4px; }
+.btn-delete-box:hover { color: #ef4444; background: #fee2e2; }
+input[type="color"] { width: 50px; height: 50px; border: none; border-radius: 8px; cursor: pointer; padding: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+/* 統一 UI 風格的下拉選單 (原生與自訂) */
+.ui-select { width: 100%; font-size: 0.85rem; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #333; outline: none; cursor: pointer;}
+
+/* 客製化下拉選單 */
+.custom-dropdown { position: relative; width: 100%; font-size: 0.85rem; }
+.cd-selected { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; background: white; cursor: pointer; user-select: none; }
+.cd-selected::after { content: '▼'; font-size: 0.6rem; color: #64748b; margin-left: auto; }
+.cd-panel { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; flex-direction: column; }
+.cd-panel.show { display: flex; }
+.cd-search-box { padding: 0.5rem; border-bottom: 1px solid #f1f5f9; }
+.cd-search-box input { width: 100%; padding: 0.4rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.8rem; box-sizing: border-box; outline: none;}
+.cd-options { max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; }
+.cd-option { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; cursor: pointer; transition: background 0.1s; }
+.cd-option:hover { background: #f1f5f9; }
+.cd-swatch { width: 14px; height: 14px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); flex-shrink: 0;}
+.cd-none-swatch { display: none; }
+
+button.primary { background: #18181b; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
+button.primary:hover { background: #3f3f46; }
+button.primary:disabled { background: #a1a1aa; cursor: not-allowed; }
+
+/* 運算結果區 */
+.result-item { border: 1px solid #e4e4e7; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; }
+.compare-row { display: flex; gap: 2rem; align-items: center; }
+.preview-swatch { width: 60px; height: 60px; border-radius: 8px; border: 1px solid #ccc; box-shadow: inset 0 0 4px rgba(0,0,0,0.1); }
+
+/* 新版長條圖樣式 */
+.result-bar-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 0.85rem; }
+.result-bar-label { width: 70px; flex-shrink: 0; font-weight: 600; color: #475569; }
+.result-bar-track { flex-grow: 1; background: #e2e8f0; border-radius: 6px; height: 24px; overflow: hidden; display: flex; }
+.result-bar-fill { height: 100%; display: flex; align-items: center; padding: 0 10px; font-size: 0.8rem; font-weight: 700; transition: width 0.3s ease; box-sizing: border-box; white-space: nowrap; }
