@@ -37,6 +37,44 @@ let targetColorStates = [
     { hex: "#ffa500", limit: 0, forceInk: "" }
 ];
 
+// ==================== ★新增的手機版「偵測高度並撐寬」演算法★ ====================
+function adjustMobileGridWidth() {
+    const grid = document.getElementById('active-inks-display');
+    if (!grid) return;
+
+    // 大於 860px 時清除強制設定，讓它正常排版
+    if (window.innerWidth > 860) {
+        grid.style.minWidth = '100%';
+        return;
+    }
+
+    // 先重置為 100% 寬度以測量自然向下排列時的高度
+    grid.style.minWidth = '100%';
+    
+    // 找出第一個標籤的高度，做為每行的高度基準
+    const firstItem = grid.children[0];
+    if (!firstItem) return;
+    
+    const itemHeight = firstItem.offsetHeight || 36;
+    const gap = 8; // 0.5rem CSS間距
+
+    // 計算 4 行的「極限容許高度」(元素高度 + 間距) * 4，並加一點容錯空間
+    const maxAllowedHeight = (itemHeight + gap) * 4 + 2; 
+
+    // 核心邏輯：如果目前高度「超過 4 行」，代表它已經往下折到第 5 行了。
+    // 我們開始逐漸增加容器寬度 (強迫內部元素往右搬移)，直到它縮回 4 行內！
+    if (grid.offsetHeight > maxAllowedHeight) {
+        let testWidth = grid.offsetWidth;
+        // 加入 testWidth < 3000 防呆，避免無窮迴圈
+        while (grid.offsetHeight > maxAllowedHeight && testWidth < 3000) {
+            testWidth += 30; // 每次撐寬 30px
+            grid.style.minWidth = testWidth + 'px';
+        }
+    }
+}
+// =====================================================================
+
+
 function saveTargetStates() {
     targetColorStates.forEach((t, i) => {
         const box = document.getElementById(`target-box-${i}`);
@@ -323,7 +361,6 @@ function renderInkLibrary() {
         else archivedContainer.innerHTML += badgeHTML;
     });
 
-    // 加上手機版專屬的「新增油墨」按鈕 Tag
     activeContainer.innerHTML += `
         <div class="ink-badge mobile-add-badge" onclick="showMobileAddInk()">
             <i class="bi bi-plus-lg"></i> <span style="font-weight:500;">新增油墨</span>
@@ -331,6 +368,9 @@ function renderInkLibrary() {
     `;
 
     updateTargetDropdowns();
+
+    // ★ 每次重新渲染完油墨後，觸發寬度計算來判斷是否需要撐開出現捲軸 ★
+    adjustMobileGridWidth();
 }
 
 function deleteInk(index) {
@@ -464,7 +504,7 @@ function editInk(index) {
     submitBtn.classList.add('btn-save');
     document.getElementById('form-btn-cancel').classList.remove('hidden');
     
-    if (window.innerWidth <= 768) showMobileAddInk();
+    if (window.innerWidth <= 860) showMobileAddInk();
 }
 
 function cancelEdit() {
@@ -502,6 +542,9 @@ window.onload = function() {
     renderTargetBoxes(); 
     renderInkLibrary();  
 };
+
+// 視窗縮放時也重新計算寬度
+window.addEventListener('resize', adjustMobileGridWidth);
 
 // ==================== 核心運算邏輯 ====================
 function hexToRgb(hex) {
@@ -673,12 +716,18 @@ function calculateColors() {
         } else {
             if (globalBestCombo) {
                 renderResults(targets, globalBestCombo, globalBestResults);
+                
+                btn.innerHTML = `<i class="bi bi-check-lg"></i> 已完成`;
+                btn.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    document.getElementById('result-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+
             } else {
                 alert("找不到符合所有限制條件的油墨組成。");
+                btn.innerHTML = `<i class="bi bi-exclamation-triangle"></i> 無法運算`;
             }
-            
-            btn.innerHTML = `<i class="bi bi-check-lg"></i> 已完成`;
-            btn.classList.add('btn-success');
             
             setTimeout(() => {
                 btn.innerHTML = `<i class="bi bi-clipboard-data"></i> 查看 RISO 油墨組成`;
@@ -738,7 +787,6 @@ function renderResults(targets, combo, results) {
             `;
         }
 
-        // 修改這裡：加入了 swatches-group 統一將目標色與疊印色綑綁，確保間距不會因為螢幕改變而跑掉
         let itemHTML = `
             <div class="result-item">
                 <div class="compare-row">
@@ -910,5 +958,10 @@ function extractDominantColors() {
         saveTargetStates();
         btn.innerHTML = originalText;
         btn.disabled = false;
+
+        setTimeout(() => {
+            document.getElementById('target-colors').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+
     }, 50);
 }

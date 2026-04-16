@@ -34,15 +34,16 @@ h1, h2, h3 { margin-top: 0; }
 .text-danger:hover { background: var(--danger-bg) !important; border-color: var(--danger) !important;}
 
 /* 版面配置：油墨庫 */
-.library-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
-.library-main { display: flex; flex-direction: column; justify-content: space-between; }
+/* ★ 加入 min-width: 0 打破 Grid 與 Flex 的預設死命撐開行為 ★ */
+.library-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; min-width: 0; }
+.library-main { display: flex; flex-direction: column; justify-content: space-between; min-width: 0; width: 100%; }
+.ink-section { min-width: 0; width: 100%; }
+
 .library-sidebar { background: var(--bg-light); border: 1px solid var(--border-light); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; }
 
 .flex-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
 
 .ink-section-title { font-size: 1rem; }
-.active-title { color: var(--success); }
-.archive-title { color: var(--text-muted); }
 
 /* 倉庫搜尋與小按鈕 */
 .archive-search-input { width: 100%; padding: 0.4rem 0.6rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.85rem; margin-bottom: 0.8rem; outline: none; }
@@ -82,7 +83,15 @@ h1, h2, h3 { margin-top: 0; }
 .modal-actions { display: flex; gap: 0.8rem; justify-content: flex-end; }
 
 /* 檔案上傳 UI */
-.file-upload-box { background: var(--bg-light); padding: 1.5rem; border-radius: 8px; border: 1px dashed var(--border-color); margin-bottom: 1.5rem; display: flex; gap: 1.5rem; align-items: center; justify-content: space-between; }
+.file-upload-box { 
+    background: var(--bg-light); padding: 1.5rem; border-radius: 8px; border: 1px dashed var(--border-color); margin-bottom: 1.5rem; 
+    display: flex; gap: 1.5rem; 
+    align-items: stretch; /* ★ 改變點1：讓左右兩邊的容器自然等高 */
+    justify-content: space-between; 
+}
+.upload-text-group { 
+    display: flex; flex-direction: column; justify-content: center; /* ★ 改變點2：左側內容垂直置中 */
+}
 .upload-title { font-size: 1rem; margin-bottom: 0.5rem; }
 .file-upload-wrapper { position: relative; display: inline-block; overflow: hidden; vertical-align: middle; }
 .file-upload-wrapper input[type="file"] { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; width: 100%; z-index: 2; }
@@ -90,11 +99,20 @@ h1, h2, h3 { margin-top: 0; }
 .file-upload-wrapper:hover .btn-upload { background: var(--bg-hover); border-color: #94a3b8; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 .file-upload-wrapper:active .btn-upload { transform: scale(0.96); }
 .file-name-text { font-size: 0.8rem; color: var(--text-muted); margin-left: 0.5rem; }
+
 .img-preview-box { display: flex; align-items: center; gap: 1rem; }
-.preview-canvas { max-height: 80px; max-width: 100%; border-radius: 4px; border: 1px solid #ccc; object-fit: contain; }
+.preview-canvas { 
+    align-self: stretch; /* ★ 改變點3：強制畫布高度撐滿，與左側文字等高 */
+    height: auto; 
+    width: auto;
+    max-width: 250px;    /* ★ 改變點4：限制橫式圖片最大寬度 */
+    min-height: 60px;    /* 確保最基本的顯示高度 */
+    border-radius: 4px; border: 1px solid #ccc; object-fit: contain; 
+}
 
 /* 目標色彩設定區 */
 .target-header-row { display: flex; justify-content: space-between; align-items: center; margin: 2rem 0 0.5rem; flex-wrap: wrap; gap: 1rem;}
+.target-controls { display: flex; gap: 0.5rem; }
 .target-header-text { margin: 0; font-weight: 500; }
 
 .color-row { 
@@ -158,9 +176,8 @@ button.btn-success { background: var(--success) !important; }
 .result-ink-badge { background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 .result-item { border: 1px solid var(--border-dark); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; }
 
-/* 為保持排版不變形所建立的包裹容器 */
-.swatches-group { display: flex; gap: 2rem; align-items: center; }
 .compare-row { display: flex; gap: 2rem; align-items: center; }
+.swatches-group { display: flex; gap: 2rem; align-items: center; }
 
 .preview-swatch { width: 60px; height: 60px; border-radius: 8px; border: 1px solid #ccc; box-shadow: inset 0 0 4px rgba(0,0,0,0.1); margin-bottom: 6px; }
 .preview-label-container { display: flex; flex-direction: column; align-items: center; gap: 4px; }
@@ -176,11 +193,12 @@ button.btn-success { background: var(--success) !important; }
 .result-bar-track { flex-grow: 1; background: var(--border-light); border-radius: 6px; height: 24px; overflow: hidden; display: flex; }
 .result-bar-fill { height: 100%; display: flex; align-items: center; padding: 0 10px; font-size: 0.8rem; font-weight: 700; transition: width 0.3s ease; white-space: nowrap; }
 
+
 /* ========================================================= */
-/* 手機與平板專屬響應式 (RWD)              */
+/* 🚀 手機與平板專屬響應式 (860px 斷點)              */
 /* ========================================================= */
 
-@media (min-width: 860px) {
+@media (min-width: 861px) {
     .color-row { 
         display: grid; 
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); 
@@ -198,12 +216,43 @@ button.btn-success { background: var(--success) !important; }
     body { margin: 1rem auto; padding: 0 0.5rem; }
     .card { padding: 1.25rem 1rem; margin-bottom: 1rem; }
     
-    /* 1. 頂部操作列切換 */
+    /* 1. 頂部操作列切換與標題不換行 */
+    .active-title { white-space: nowrap; flex-shrink: 0; }
     .desktop-actions { display: none !important; }
     .mobile-actions { display: flex !important; align-items: center; gap: 0.5rem; width: 100%; justify-content: flex-end; }
     
-    /* 2. 行數限制與捲軸 (四行與六行限制) */
-    .ink-library-grid { max-height: 160px; overflow-y: auto; align-content: flex-start; padding-right: 4px; }
+    /* 2. ★ 新增的外層捲動容器 ★ (在此嚴格限制最大寬度) */
+    .ink-scroll-wrapper {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-color) var(--bg-hover);
+    }
+    .ink-scroll-wrapper::-webkit-scrollbar { height: 6px; }
+    .ink-scroll-wrapper::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+    .ink-scroll-wrapper::-webkit-scrollbar-track { background: var(--bg-hover); border-radius: 4px; }
+
+    /* 2. ★ 油墨列表：恢復純粹的橫向 Flow 排列 */
+    .ink-library-grid {
+        display: flex;
+        flex-direction: row;      /* 左至右排列 */
+        flex-wrap: wrap;          /* 滿了自動換行 */
+        gap: 0.5rem;
+        height: auto;             
+        max-height: none;
+        overflow-x: visible;
+    }
+
+    /* 防止被 Flex 擠壓 */
+    .ink-badge { 
+        flex: 0 0 auto; 
+        width: max-content; 
+    }
+    
+    /* 油墨倉庫維持上下捲動不受影響 */
     .archived-list { max-height: 240px; overflow-y: auto; padding-right: 4px; }
 
     /* 3. 新增油墨 Tag 顯示，預設表單隱藏 */
@@ -221,19 +270,51 @@ button.btn-success { background: var(--success) !important; }
     .mobile-only-btn { display: inline-flex !important; }
     .library-layout { grid-template-columns: 1fr; gap: 1rem; }
     
-    /* 圖片上傳區垂直化 */
-    .file-upload-box { flex-direction: column; align-items: stretch; gap: 1.2rem; }
-    .upload-text-group { display: flex; flex-direction: column; gap: 0.5rem; }
-    .img-preview-box { flex-direction: column; align-items: center; width: 100%; }
-    .img-preview-box button { width: 100%; justify-content: center; }
+    /* 5. 圖片上傳區改為左右排列 */
+    .file-upload-box { 
+        position: relative; /* 成為內部 canvas 絕對定位的錨點 */
+        flex-direction: column; 
+        align-items: stretch; 
+        gap: 1.2rem; 
+    }
+    .upload-text-group { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 0.5rem; 
+        width: 60%;         /* 將文字限制在左側 */
+        min-height: 85px;   /* 確保高度不會被右方的絕對定位圖片蓋到 */
+    }
+    .file-name-text {
+        word-break: break-word; /* 避免檔名太長破版 */
+    }
+    .img-preview-box { 
+        width: 100%; 
+        flex-direction: column; 
+        gap: 0; 
+    }
+    .preview-canvas { 
+        position: absolute; /* 抽離正常排版，自動吸附到右上角 */
+        top: 1.5rem; 
+        right: 1.5rem; 
+        max-width: 35%;     /* 右側保留 35% 空間 */
+        height: 85px;       /* ★ 直接與左側預留的 85px 等高 */
+        object-fit: contain;
+    }
+    .img-preview-box button { 
+        width: 100%; 
+        justify-content: center; 
+        margin-top: 0.5rem; 
+    }
     
-    /* 目標色按鈕與運算按鈕滿版置中 */
-    .target-header-row { flex-direction: column; align-items: flex-start; gap: 1rem; }
-    .target-controls { width: 100%; display: flex; gap: 0.5rem; }
-    .target-controls button { flex: 1; justify-content: center; padding: 0.6rem 0; }
+    /* 6. 目標色彩設定標頭與按鈕 */
+    .target-header-row { flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
+    .target-header-text { font-size: 0.85rem; white-space: nowrap; flex-shrink: 0; margin: 0; }
+    .target-controls { width: auto; display: flex; gap: 0.3rem; flex-shrink: 1; justify-content: flex-end; }
+    .target-controls button { flex: none; padding: 4px 8px; font-size: 0.75rem; justify-content: center; width: auto; min-width: 0; }
+    
     .btn-block { width: 100%; justify-content: center; margin: 0 auto; display: flex; }
     
-    /* 5. 運算結果區排版折行與色塊間距固定 */
+    /* 7. 運算結果區排版折行與色塊間距固定 */
     .compare-row { flex-direction: column; gap: 1rem; align-items: stretch; }
     .swatches-group { width: 100%; justify-content: center; gap: 2rem; margin-bottom: 0.5rem; }
     .bar-chart-container { width: 100%; padding-left: 0; }
@@ -243,7 +324,7 @@ button.btn-success { background: var(--success) !important; }
     .modal-actions { flex-direction: column; }
     .modal-actions button { width: 100%; justify-content: center; }
 
-    /* 6. Dropdown 選單修正為底部彈出 (解決被裁切問題) */
+    /* Dropdown 選單修正為底部彈出 */
     .cd-panel {
         position: fixed;
         top: auto !important;

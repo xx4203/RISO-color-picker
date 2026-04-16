@@ -16,14 +16,14 @@
 <body>
 
     <div class="card">
-        <h1>RISO 油墨混色指南 (V2.9)</h1>
+        <h1>RISO 油墨混色指南 (V3.0)</h1>
         
         <div class="section-divider">
             <div class="library-layout">
                 <div class="library-main">
                     <div class="ink-section">
                         <div class="flex-between" style="position: relative;">
-                            <h3 class="ink-section-title active-title" style="margin: 0;">使用中的油墨</h3>
+                            <h3 class="ink-section-title active-title" style="margin: 0; color: var(--text-muted);">使用中的油墨</h3>
                             
                             <div class="action-btn-group desktop-actions">
                                 <button class="btn-action" onclick="openImportModal()"><i class="bi bi-box-arrow-in-down"></i> 匯入</button>
@@ -42,7 +42,9 @@
                                 <button class="btn-action" style="justify-content:flex-start; font-size:0.85rem;" onclick="moveAllToArchive()"><i class="bi bi-archive-fill"></i> 全部移至倉庫</button>
                             </div>
                         </div>
-                        <div class="ink-library-grid" id="active-inks-display"></div>
+                        <div class="ink-scroll-wrapper">
+                            <div class="ink-library-grid" id="active-inks-display"></div>
+                        </div>
                     </div>
                     
                     <div class="add-ink-form">
@@ -87,7 +89,7 @@
         
         <div class="target-header-row">
             <p class="target-header-text"><i class="bi bi-1-circle-fill"></i> 設定目標色彩</p>
-            <div class="target-controls" style="display: flex; gap: 0.5rem;">
+            <div class="target-controls">
                 <button onclick="resetAllSettings()" class="btn-secondary text-danger"><i class="bi bi-eraser-fill"></i> 清除設定</button>
                 <button onclick="addTargetColor()" id="btn-add-target" class="btn-secondary"><i class="bi bi-plus-lg"></i> 新增色票</button>
             </div>
