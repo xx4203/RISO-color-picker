@@ -225,7 +225,7 @@ button.btn-success { background: var(--success) !important; }
     .bar-chart-container { width: 100%; padding-left: 0; }
     .modal-btn-row, .modal-actions { flex-direction: column; }
     .modal-actions button { width: 100%; justify-content: center; }
-    .cd-panel { position: fixed; top: auto !important; bottom: 0; left: 0; width: 100vw; max-height: 60vh; border-radius: 1.5rem 1.5rem 0 0; box-shadow: 0 -0.5rem 2.5rem var(--shadow-xl); z-index: 9999; border: none; padding-bottom: env(safe-area-inset-bottom, 1.5rem); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    .cd-panel { z-index: 1000; position: fixed; top: auto !important; bottom: 0; left: 0; width: 100vw; max-height: 60vh; border-radius: 1.5rem 1.5rem 0 0; box-shadow: 0 -0.5rem 2.5rem var(--shadow-xl); z-index: 9999; border: none; padding-bottom: env(safe-area-inset-bottom, 1.5rem); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
     .cd-search-box { padding: 1.5rem; }
     .cd-options { max-height: calc(60vh - 8rem); }
     .cd-option { padding: 1.5rem 1.5rem; font-size: 1.5rem; }
