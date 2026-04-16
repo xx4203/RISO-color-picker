@@ -173,7 +173,7 @@ function renderTargetBoxes() {
             <div class="color-box" id="target-box-${i}">
                 <button class="btn-delete-box" onclick="removeTargetColor(${i})" title="刪除此色票"><i class="bi bi-x"></i></button>
                 <input type="color" value="${t.hex}" class="target-hex">
-                <label style="font-weight:bold; font-size:0.9rem;">色票 ${i+1}</label>
+                <label style="font-weight:bold; font-size:1.2rem;">色票 ${i+1}</label>
                 
                 <div class="custom-dropdown" id="limit-cd-${i}">
                     <div class="cd-selected" onclick="toggleDropdown('limit-panel-${i}')">
@@ -485,7 +485,7 @@ function renderInkLibrary() {
 
     activeContainer.innerHTML += `
         <div class="ink-badge mobile-add-badge" onclick="showMobileAddInk()">
-            <i class="bi bi-plus-lg"></i> <span style="font-weight:500;">新增油墨</span>
+            <i class="bi bi-plus-lg"></i> <span style="font-weight:500;">自訂油墨</span>
         </div>
     `;
 
@@ -630,7 +630,7 @@ function editInk(index) {
 function cancelEdit() {
     editingIndex = -1;
     document.getElementById('form-ink-name').value = '';
-    document.getElementById('form-title').innerText = '新增油墨：';
+    document.getElementById('form-title').innerText = '自訂油墨：';
     const submitBtn = document.getElementById('form-btn-submit');
     submitBtn.innerText = '加入';
     submitBtn.classList.remove('btn-save');
@@ -935,9 +935,11 @@ function renderResults(targets, combo, results) {
                 itemHTML += `
                     <div class="result-bar-row">
                         <div class="result-bar-label">${ink.name}</div>
+                        <div class="result-bar-pct">${pct}%</div>
+                        
                         <div class="result-bar-track">
                             <div class="result-bar-fill" style="background: ${ink.hex}; width: ${pct}%; color: ${textColor};">
-                                ${pct}%
+                                <span class="desktop-pct">${pct}%</span>
                             </div>
                         </div>
                     </div>

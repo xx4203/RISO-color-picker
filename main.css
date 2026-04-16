@@ -112,7 +112,7 @@ h3 { font-size: 1.5rem; }
 .color-row::-webkit-scrollbar { height: 0.6rem; }
 .color-row::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 0.5rem; }
 .color-row::-webkit-scrollbar-track { background: var(--bg-hover); border-radius: 0.5rem; }
-.color-box { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; background: var(--bg-light); padding: 2.88rem 1.5rem 2.5rem 1.5rem; border-radius: 1rem; border: 0.1rem solid var(--border-light); flex: 0 0 0 42%; min-width: 14rem; scroll-snap-align: start; }
+.color-box { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; background: var(--bg-light); padding: 2.88rem 1.5rem 2.5rem 1.5rem; border-radius: 1rem; border: 0.1rem solid var(--border-light); flex: 0 0 40%; min-width: 17rem; scroll-snap-align: start; }
 .btn-delete-box { position: absolute; top: 0.64rem; right: 0.64rem; background: var(--transparent); border: none; color: var(--border-hover); cursor: pointer; font-size: 1.76rem; line-height: 1; padding: 0.5rem; border-radius: 0.5rem; }
 .btn-delete-box:hover { color: var(--danger); background: var(--danger-bg); }
 input[type="color"] { width: 5rem; height: 5rem; border: none; border-radius: 0.2rem; cursor: pointer; padding: 0; box-shadow: 0 0.2rem 0.5rem var(--shadow-md); }
@@ -142,7 +142,7 @@ button.primary:disabled { background: var(--disabled); cursor: not-allowed; }
 button.btn-success { background: var(--success) !important; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 .spin-anim { animation: spin 1s linear infinite; display: inline-block; }
-.result-summary-title { display: block; margin-bottom: 1.5rem; color: var(--text-strong); font-weight: bold; }
+.result-summary-title { display: block; margin-bottom: 1.5rem; color: var(--text-strong); font-weight: bold; font-size: 1.5rem; }
 .result-badge-container { display: flex; gap: 1rem; flex-wrap: wrap; }
 .result-ink-badge { background: var(--white); box-shadow: 0 0.1rem 0.2rem var(--shadow-light); }
 .result-item { border: 0.1rem solid var(--border-dark); padding: 2.5rem; border-radius: 1rem; margin-bottom: 1.5rem; }
@@ -160,6 +160,10 @@ button.btn-success { background: var(--success) !important; }
 .result-bar-label { font-size: 1.2rem; width: 7rem; flex-shrink: 0; font-weight: 600; color: var(--text-strong); }
 .result-bar-track { flex-grow: 1; background: var(--border-light); border-radius: 0.6rem; height: 2.2rem; overflow: hidden; display: flex; }
 .result-bar-fill { height: 100%; display: flex; align-items: center; padding: 0 1rem; font-size: 1.5rem; font-weight: 700; transition: width 0.3s ease; white-space: nowrap; }
+/* 桌面版預設隱藏外側的比例 */
+.result-bar-pct {
+    display: none; 
+}
 
 /* ========================================= */
 /* 9. Footer */
@@ -176,7 +180,7 @@ button.btn-success { background: var(--success) !important; }
 /* ========================================= */
 /* 10. 響應式：平板與手機端 (860px 斷點) */
 /* ========================================= */
-@media (min-width: 1000px) {
+@media (min-width: 768px) {
     .color-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); overflow-x: visible; padding-bottom: 0; flex-wrap: wrap; }
     .color-box { flex: auto; width: 100%; min-width: 0; }
     .mobile-actions, .mobile-only-btn { display: none !important; }
@@ -216,13 +220,65 @@ button.btn-success { background: var(--success) !important; }
     .preview-canvas { position: absolute; top: 2.5rem; right: 2.5rem; max-width: 35%; height: 8.5rem; object-fit: contain; }
     .img-preview-box button { width: 100%; justify-content: center; margin-top: 1rem; }
     .target-header-row { flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 1rem; }
-    .target-header-text { font-size: 1.36rem; white-space: nowrap; flex-shrink: 0; margin: 0; }
+    .target-header-text { font-size: 1.5rem; white-space: nowrap; flex-shrink: 0; margin: 0; }
     .target-controls { width: auto; display: flex; gap: 0.48rem; flex-shrink: 1; justify-content: flex-end; }
     .target-controls button { flex: none; padding: 0.5rem 1rem; font-size: 1.2rem; justify-content: center; width: auto; min-width: 0; }
     .btn-block { width: 100%; justify-content: center; margin: 0 auto; display: flex; }
-    .compare-row { flex-direction: column; gap: 1.5rem; align-items: stretch; }
-    .swatches-group { width: 100%; justify-content: center; gap: 3rem; margin-bottom: 1rem; }
-    .bar-chart-container { width: 100%; padding-left: 0; }
+    .compare-row { 
+        flex-direction: row; 
+        gap: 1.2rem; 
+        align-items: center; 
+        position: relative; /* 給 r-tag 定位用 */
+        padding-top: 1.6rem; /* 預留上方空間給右上角標籤 */
+    }
+    .swatches-group { 
+        width: auto; 
+        gap: 1rem; 
+        margin-bottom: 0; 
+        flex-shrink: 0; /* 防止被長條圖擠壓 */
+    }
+    .preview-swatch { 
+        width: 4.8rem; 
+        height: 4.8rem; 
+        border-radius: 0.8rem; 
+    }
+    .r-tags-container {
+        position: absolute;
+        top: -0.4rem;
+        right: 0;
+        flex-direction: row; /* 若有多個標籤則橫向並排 */
+        gap: 0.4rem;
+    }
+    .preview-label { font-size: 1.12rem; }
+    .bar-chart-container { 
+        width: 100%; 
+        padding-left: 0; 
+        flex-grow: 1; 
+    }
+    .result-bar-row { 
+        gap: 0; 
+        margin-bottom: 0.8rem; 
+    }
+    .result-bar-label { 
+        display: none !important; 
+    }
+    .result-bar-pct { 
+        display: block; /* 顯示外部的 % */
+        font-size: 1.2rem;
+        font-weight: 600;
+        width: 3.5rem; 
+        text-align: right;
+        margin-right: 0.8rem;
+        color: var(--text-strong);
+    }
+    .desktop-pct { 
+        display: none !important; /* 隱藏內部的 % */
+    }
+    .result-bar-track { 
+        height: 0.8rem; /* 高度變窄 */
+        border-radius: 0.4rem;
+        flex-grow: 1; /* 寬度自動填滿剩下的空間 (變短) */
+    }
     .modal-btn-row, .modal-actions { flex-direction: column; }
     .modal-actions button { width: 100%; justify-content: center; }
     .cd-panel { z-index: 1000; position: fixed; top: auto !important; bottom: 0; left: 0; width: 100vw; max-height: 60vh; border-radius: 1.5rem 1.5rem 0 0; box-shadow: 0 -0.5rem 2.5rem var(--shadow-xl); z-index: 9999; border: none; padding-bottom: env(safe-area-inset-bottom, 1.5rem); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
