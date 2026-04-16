@@ -1,3 +1,24 @@
+// 1. 建立 Footer 元素 (改為 div 較符合語意)
+const footerDiv = document.createElement("div");
+footerDiv.className = "footer";
+footerDiv.innerHTML = `
+    <div id="copyright">
+        <p>Dan Lo © </p>
+        <p id="copyright-year"></p>
+        <p>All rights reserved.</p>
+    </div>
+    <div class="footer-social-link">
+        <a href="http://xx4203.com"><i class="bi bi-globe2 icon-btn sec-color"></i></a>
+        <a href="https://www.instagram.com/x_x4203/"><i class="bi bi-instagram icon-btn sec-color"></i></a>
+        <i class="bi bi-envelope icon-btn sec-color" id="copyEmail" style="cursor:pointer;"></i>
+    </div>
+    <i id="back-top" class="bi bi-arrow-up-circle icon-btn sec-color" style="cursor:pointer;"></i>
+`;
+
+// 2. 將 Footer 安全地加入到網頁最下方 (body 的末端)
+document.body.appendChild(footerDiv);
+
+
 let defaultActives = ["黑", "金", "青", "螢光粉", "赤紅", "黃", "若葉綠", "薄荷綠"];
 
 let RISO_INKS = [
@@ -97,6 +118,17 @@ function addTargetColor() {
     targetColorStates.push({ hex: "#000000", limit: 0, forceInk: "" });
     renderTargetBoxes();
     updateExtractBtnText();
+    
+    setTimeout(() => {
+        const newIndex = targetColorStates.length - 1;
+        const newBox = document.getElementById(`target-box-${newIndex}`);
+        if (newBox) {
+            const colorRow = document.getElementById('target-colors');
+            if (colorRow) colorRow.scrollLeft = colorRow.scrollWidth;
+            newBox.classList.add('flash-anim');
+            setTimeout(() => newBox.classList.remove('flash-anim'), 600);
+        }
+    }, 50);
 }
 
 function removeTargetColor(index) {
@@ -132,6 +164,7 @@ function getLimitText(val) {
 }
 
 function renderTargetBoxes() {
+    document.querySelectorAll('body > .cd-panel').forEach(p => p.remove());
     const container = document.getElementById('target-colors');
     container.innerHTML = '';
     
@@ -179,28 +212,21 @@ function renderTargetBoxes() {
     updateTargetDropdowns();
 }
 
-function toggleDropdown(panelId, focusSearch = false) {
-    document.querySelectorAll('.cd-panel').forEach(p => {
-        if(p.id !== panelId) p.classList.remove('show');
-    });
+function closePanel(panelId) {
     const panel = document.getElementById(panelId);
-    if(panel) panel.classList.toggle('show');
-    
-    if(panel && panel.classList.contains('show') && focusSearch) {
-        const searchInput = panel.querySelector('input[type="text"]');
-        if (searchInput) {
-            searchInput.value = '';
-            const idx = panelId.split('-').pop();
-            filterDropdown(idx, '');
-            setTimeout(() => searchInput.focus(), 50);
-        }
+    if (!panel) return;
+    panel.classList.remove('show');
+    if (panel.dataset.originalParent) {
+        const parent = document.getElementById(panel.dataset.originalParent);
+        if (parent) parent.appendChild(panel);
     }
 }
 
 function selectLimit(boxIndex, value, text) {
     document.getElementById(`limit-val-${boxIndex}`).value = value;
     document.getElementById(`limit-text-${boxIndex}`).innerText = text;
-    document.getElementById(`limit-panel-${boxIndex}`).classList.remove('show');
+    
+    closePanel(`limit-panel-${boxIndex}`);
     
     const clearIcon = document.getElementById(`limit-clear-icon-${boxIndex}`);
     const arrowIcon = document.getElementById(`limit-arrow-${boxIndex}`);
@@ -235,14 +261,17 @@ function selectInk(boxIndex, inkName, inkHex) {
         clearIcon.classList.add('hidden');
         arrowIcon.classList.remove('hidden');
     }
-    document.getElementById(`ink-panel-${boxIndex}`).classList.remove('show');
+    
+    closePanel(`ink-panel-${boxIndex}`);
+    
     saveTargetStates();
 }
 
 function selectMaxInks(val, text) {
     document.getElementById('max-inks-val').value = val;
     document.getElementById('max-inks-text').innerText = text;
-    document.getElementById('max-inks-panel').classList.remove('show');
+    
+    closePanel('max-inks-panel');
 }
 
 function filterDropdown(boxIndex, keyword) {
@@ -272,6 +301,8 @@ function toggleMobileArchive() {
 function showMobileAddInk() {
     document.querySelector('.add-ink-form').classList.add('show-mobile-flex');
     document.getElementById('mobile-archive-section').classList.remove('show-mobile-flex');
+    document.getElementById('form-btn-cancel').classList.remove('hidden'); 
+    document.getElementById('form-btn-cancel').style.display = 'block'; // 確保顯示取消按鈕
     setTimeout(() => document.getElementById('form-ink-name').focus(), 100);
 }
 
@@ -279,9 +310,48 @@ function jumpToAddInkFromArchive() {
     showMobileAddInk();
 }
 
+function toggleDropdown(panelId, focusSearch = false) {
+    const panel = document.getElementById(panelId);
+    
+    document.querySelectorAll('.cd-panel').forEach(p => {
+        if(p.id !== panelId && p.classList.contains('show')) closePanel(p.id);
+    });
+
+    if (!panel) return;
+
+    if (panel.classList.contains('show')) {
+        closePanel(panelId);
+    } else {
+        panel.classList.add('show');
+        
+        // 手機版直接移入 body 脫離裁切限制
+        if (window.innerWidth <= 860) {
+            if (!panel.dataset.originalParent) {
+                if (!panel.parentElement.id) {
+                    panel.parentElement.id = 'cd-parent-' + Math.random().toString(36).substr(2, 9);
+                }
+                panel.dataset.originalParent = panel.parentElement.id;
+            }
+            document.body.appendChild(panel);
+        }
+        
+        if(focusSearch) {
+            const searchInput = panel.querySelector('input[type="text"]');
+            if (searchInput) {
+                searchInput.value = '';
+                const idx = panelId.split('-').pop();
+                filterDropdown(idx, '');
+                setTimeout(() => searchInput.focus(), 50);
+            }
+        }
+    }
+}
+
 window.onclick = function(event) {
-    if (!event.target.closest('.custom-dropdown')) {
-        document.querySelectorAll('.cd-panel').forEach(p => p.classList.remove('show'));
+    if (!event.target.closest('.custom-dropdown') && !event.target.closest('.cd-panel')) {
+        document.querySelectorAll('.cd-panel').forEach(p => {
+            if (p.classList.contains('show')) closePanel(p.id);
+        });
     }
     if (!event.target.closest('#mobile-more-menu') && !event.target.closest('#mobile-more-btn')) {
         const menu = document.getElementById('mobile-more-menu');
@@ -290,14 +360,28 @@ window.onclick = function(event) {
 }
 
 // ==================== 油墨庫渲染與批次管理 ====================
-function moveAllToArchive() {
-    RISO_INKS.forEach(ink => ink.active = false);
+function toggleAllInks() {
+    const allActive = RISO_INKS.every(ink => ink.active);
+    const archivedCount = RISO_INKS.filter(ink => !ink.active).length;
+    
+    // 如果全部都在使用中，或者倉庫為空，就執行「全部停用」
+    if (allActive || archivedCount === 0) {
+        RISO_INKS.forEach(ink => ink.active = false);
+    } else {
+        // 否則執行「全部啟用」
+        RISO_INKS.forEach(ink => ink.active = true);
+    }
     renderInkLibrary();
 }
 
-function enableAllInks() {
-    RISO_INKS.forEach(ink => ink.active = true);
+function moveAllToArchive() {
+    // 將所有油墨狀態設為非啟用
+    RISO_INKS.forEach(ink => ink.active = false);
     renderInkLibrary();
+    
+    // 執行完畢後自動關閉手機版的更多選單
+    const menu = document.getElementById('mobile-more-menu');
+    if(menu) menu.classList.add('hidden');
 }
 
 function addDefaultInks() {
@@ -308,11 +392,31 @@ function addDefaultInks() {
         { name: "若葉綠", hex: "#00A95C" }, { name: "薄荷綠", hex: "#5ebfc7" }
     ];
 
+    let allAlreadyActive = true;
+    let coreNames = coreInks.map(c => c.name);
+
     coreInks.forEach(coreInk => {
         let existingInk = RISO_INKS.find(ink => ink.name === coreInk.name);
-        if (existingInk) {
-            existingInk.active = true;
-        } else {
+        if (!existingInk || !existingInk.active) allAlreadyActive = false;
+    });
+
+    if (allAlreadyActive) {
+        const badges = document.querySelectorAll('#active-inks-display .ink-badge');
+        badges.forEach(badge => {
+            const nameSpan = badge.querySelector('span');
+            if (nameSpan && coreNames.includes(nameSpan.innerText.trim())) {
+                badge.classList.remove('flash-anim');
+                void badge.offsetWidth; 
+                badge.classList.add('flash-anim');
+            }
+        });
+        return;
+    }
+
+    coreInks.forEach(coreInk => {
+        let existingInk = RISO_INKS.find(ink => ink.name === coreInk.name);
+        if (existingInk) existingInk.active = true;
+        else {
             let newInk = { name: coreInk.name, hex: coreInk.hex, active: true };
             computeInkProperties(newInk);
             RISO_INKS.push(newInk);
@@ -332,27 +436,28 @@ function renderInkLibrary() {
     activeContainer.innerHTML = '';
     archivedContainer.innerHTML = '';
 
+    let archivedCount = 0;
+
     RISO_INKS.forEach((ink, index) => {
         let actionButtons = `
-            <button class="btn-icon" onclick="editInk(${index})" title="編輯"><i class="bi bi-pencil-fill"></i></button>
-            <button class="btn-icon" onclick="toggleInk(${index})" title="${ink.active ? '移入倉庫' : '啟用'}">
-                <i class="bi ${ink.active ? 'bi-x-lg' : 'bi-plus-lg'}"></i>
-            </button>
+            <div style="display:flex; gap:4px; margin-left:auto;">
+                <button class="btn-icon" onclick="editInk(${index})" title="編輯"><i class="bi bi-pencil-fill"></i></button>
+                <button class="btn-icon" onclick="toggleInk(${index})" title="${ink.active ? '移入倉庫' : '啟用'}">
+                    <i class="bi ${ink.active ? 'bi-x-lg' : 'bi-plus-lg'}"></i>
+                </button>
+            </div>
         `;
         
         if (!ink.active) {
-            if (archiveSearchKeyword && !ink.name.toLowerCase().includes(archiveSearchKeyword)) {
-                return; 
-            }
-            actionButtons += `
-                <button class="btn-icon btn-icon-danger" onclick="deleteInk(${index})" title="永久刪除"><i class="bi bi-trash-fill"></i></button>
-            `;
+            archivedCount++;
+            if (archiveSearchKeyword && !ink.name.toLowerCase().includes(archiveSearchKeyword)) return; 
+            actionButtons = actionButtons.replace('</div>', `<button class="btn-icon btn-icon-danger" onclick="deleteInk(${index})" title="永久刪除"><i class="bi bi-trash-fill"></i></button></div>`);
         }
 
         const badgeHTML = `
             <div class="ink-badge ${ink.active ? '' : 'archived'}">
                 <div class="ink-badge-color" style="background: ${ink.hex};"></div>
-                <span style="font-weight:500; margin-right: auto; padding-right: 0.5rem;">${ink.name}</span>
+                <span style="font-weight:500; padding-right: 0.5rem;">${ink.name}</span>
                 ${actionButtons}
             </div>
         `;
@@ -361,6 +466,23 @@ function renderInkLibrary() {
         else archivedContainer.innerHTML += badgeHTML;
     });
 
+    const allActive = RISO_INKS.every(ink => ink.active);
+    const toggleBtn = document.getElementById('btn-toggle-all-inks');
+    if (toggleBtn) {
+        if (allActive || archivedCount === 0) {
+            toggleBtn.innerHTML = '<i class="bi bi-archive-fill"></i> 全部停用';
+        } else {
+            toggleBtn.innerHTML = '<i class="bi bi-check-all"></i> 全部啟用';
+        }
+    }
+
+    if (archivedCount === 0) {
+        archivedContainer.innerHTML = '<div style="color:var(--text-muted); font-size:1.2rem; text-align:center; padding: 1rem 0; width: 100%;">所有油墨啟用中</div>';
+    }
+    
+    const searchInput = document.getElementById('archive-search');
+    if (searchInput) searchInput.style.display = archivedCount < 7 ? 'none' : 'block';
+
     activeContainer.innerHTML += `
         <div class="ink-badge mobile-add-badge" onclick="showMobileAddInk()">
             <i class="bi bi-plus-lg"></i> <span style="font-weight:500;">新增油墨</span>
@@ -368,8 +490,6 @@ function renderInkLibrary() {
     `;
 
     updateTargetDropdowns();
-
-    // ★ 每次重新渲染完油墨後，觸發寬度計算來判斷是否需要撐開出現捲軸 ★
     adjustMobileGridWidth();
 }
 
@@ -514,7 +634,11 @@ function cancelEdit() {
     const submitBtn = document.getElementById('form-btn-submit');
     submitBtn.innerText = '加入';
     submitBtn.classList.remove('btn-save');
-    document.getElementById('form-btn-cancel').classList.add('hidden');
+    
+    document.querySelector('.add-ink-form').classList.remove('show-mobile-flex');
+    if (window.innerWidth > 860) {
+        document.getElementById('form-btn-cancel').style.display = 'none';
+    }
 }
 
 function submitInkForm() {
@@ -730,7 +854,7 @@ function calculateColors() {
             }
             
             setTimeout(() => {
-                btn.innerHTML = `<i class="bi bi-clipboard-data"></i> 查看 RISO 油墨組成`;
+                btn.innerHTML = `<i class="bi bi-clipboard-data"></i> 尋找適合的配色方案`;
                 btn.classList.remove('btn-success');
                 btn.disabled = false;
             }, 1500);
@@ -965,3 +1089,63 @@ function extractDominantColors() {
 
     }, 50);
 }
+
+// 將整份程式碼用 IIFE 包起來，保護內部變數不與其他 JS 衝突
+(() => {
+    // =========================
+    // copy-email-btn
+    // =========================
+    const copyEmailBtn = document.getElementById("copyEmail");
+    
+    if (copyEmailBtn) { // 防呆：確認按鈕存在才綁定事件
+        copyEmailBtn.addEventListener("click", function () {
+            const textToCopy = "xox4203@gmail.com"; 
+            const icon = this;
+
+            // 複製文字到剪貼簿
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                // 變更 icon 為 copy icon
+                icon.classList.remove("bi-envelope");
+                icon.classList.add("bi-copy");
+
+                // 延長至 1.5 秒後變回 envelope icon，讓使用者有足夠時間看清回饋
+                setTimeout(() => {
+                    icon.classList.remove("bi-copy");
+                    icon.classList.add("bi-envelope");
+                }, 1500); 
+            }).catch(err => {
+                console.error("複製失敗:", err);
+            });
+        });
+    }
+
+    // =========================
+    // back-top-btn
+    // =========================
+    const backTopBtn = document.getElementById('back-top');
+    
+    if (backTopBtn) {
+        backTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+
+    // =========================
+    // 網站年份
+    // =========================
+    const yearSpan = document.getElementById("copyright-year");
+    
+    if (yearSpan) {
+        const startYear = 2019;
+        const currentYear = new Date().getFullYear();
+
+        const yearText = startYear === currentYear
+            ? `${currentYear}`
+            : `${startYear}-${currentYear}`;
+
+        yearSpan.textContent = yearText;
+    }
+})();
