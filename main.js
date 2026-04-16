@@ -109,7 +109,7 @@ function saveTargetStates() {
 
 function updateExtractBtnText() {
     const extractBtn = document.getElementById('extract-btn');
-    if(extractBtn) extractBtn.innerHTML = `<i class="bi bi-eyedropper"></i> 擷取出 ${targetColorStates.length} 個顏色`;
+    if(extractBtn) extractBtn.innerHTML = `<i class="bi bi-eyedropper"></i> 取樣 ${targetColorStates.length} 個顏色`;
 }
 
 function addTargetColor() {
@@ -182,6 +182,10 @@ function renderTargetBoxes() {
                         <span class="cd-arrow ${t.limit === 0 ? '' : 'hidden'}" id="limit-arrow-${i}">▼</span>
                     </div>
                     <div class="cd-panel" id="limit-panel-${i}">
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding: 1.5rem; border-bottom: 0.1rem solid var(--bg-hover);">
+                            <strong style="color:var(--text-muted); font-size: 1.3rem;">色彩限制</strong>
+                            <i class="bi bi-x-lg" style="cursor:pointer; color:var(--text-muted); font-size: 1.5rem;" onclick="closePanel('limit-panel-${i}')"></i>
+                        </div>
                         <div class="cd-options">
                             <div class="cd-option" onclick="selectLimit(${i}, 0, '不限混合數')"><span>不限混合數</span></div>
                             <div class="cd-option" onclick="selectLimit(${i}, 1, '限制單色')"><span>限制單色</span></div>
@@ -199,8 +203,9 @@ function renderTargetBoxes() {
                         <span class="cd-arrow ${t.forceInk === '' ? '' : 'hidden'}" id="ink-arrow-${i}">▼</span>
                     </div>
                     <div class="cd-panel" id="ink-panel-${i}">
-                        <div class="cd-search-box">
-                            <input type="text" placeholder="搜尋油墨..." onkeyup="filterDropdown(${i}, this.value)" onclick="event.stopPropagation()">
+                        <div class="cd-search-box" style="display:flex; align-items:center; gap: 1rem;">
+                            <input type="text" placeholder="搜尋油墨..." style="flex-grow:1;" onkeyup="filterDropdown(${i}, this.value)" onclick="event.stopPropagation()">
+                            <i class="bi bi-x-lg" style="cursor:pointer; color:var(--text-muted); font-size: 1.5rem;" onclick="closePanel('ink-panel-${i}')"></i>
                         </div>
                         <div class="cd-options" id="ink-options-${i}"></div>
                     </div>
@@ -347,17 +352,44 @@ function toggleDropdown(panelId, focusSearch = false) {
     }
 }
 
-window.onclick = function(event) {
-    if (!event.target.closest('.custom-dropdown') && !event.target.closest('.cd-panel')) {
-        document.querySelectorAll('.cd-panel').forEach(p => {
-            if (p.classList.contains('show')) closePanel(p.id);
-        });
+// ==================== 視窗點擊事件 (支援手機觸控關閉 & 防誤觸) ====================
+function closeAllOutside(event) {
+    let wasOpen = false;
+
+    // 1. 處理所有自訂下拉選單 (色彩限制、油墨指定)
+    const openPanels = document.querySelectorAll('.cd-panel.show');
+    if (openPanels.length > 0 && !event.target.closest('.custom-dropdown') && !event.target.closest('.cd-panel')) {
+        openPanels.forEach(p => closePanel(p.id));
+        wasOpen = true;
     }
-    if (!event.target.closest('#mobile-more-menu') && !event.target.closest('#mobile-more-btn')) {
-        const menu = document.getElementById('mobile-more-menu');
-        if(menu) menu.classList.add('hidden');
+    
+    // 2. 處理手機版「更多」(三個點) 選單
+    const menu = document.getElementById('mobile-more-menu');
+    if (menu && !menu.classList.contains('hidden') && !event.target.closest('#mobile-more-menu') && !event.target.closest('#mobile-more-btn')) {
+        menu.classList.add('hidden');
+        wasOpen = true;
+    }
+
+    // 3. 處理匯入/匯出 Modal 點擊外部關閉 (點擊到半透明遮罩本身)
+    if (event.target.classList.contains('modal-overlay')) {
+        event.target.classList.add('hidden');
+        wasOpen = true;
+    }
+
+    // ⭐️ 如果這次點擊剛好關閉了任何選單/視窗，就攔截這次點擊，避免誤觸底下的按鈕
+    if (wasOpen) {
+        event.stopPropagation();
+        event.preventDefault();
     }
 }
+
+// 使用 { capture: true } 讓事件在最外層 (捕獲階段) 優先執行，這樣才能成功攔截
+document.addEventListener('click', closeAllOutside, { capture: true });
+document.addEventListener('touchstart', closeAllOutside, { passive: false, capture: true });
+
+// 同時綁定 click 與 touchstart，確保在 iOS 等手機瀏覽器點擊空白處也能順利觸發
+document.addEventListener('click', closeAllOutside);
+document.addEventListener('touchstart', closeAllOutside, { passive: true });
 
 // ==================== 油墨庫渲染與批次管理 ====================
 function toggleAllInks() {
@@ -392,36 +424,45 @@ function addDefaultInks() {
         { name: "若葉綠", hex: "#00A95C" }, { name: "薄荷綠", hex: "#5ebfc7" }
     ];
 
-    let allAlreadyActive = true;
-    let coreNames = coreInks.map(c => c.name);
+    const coreNames = coreInks.map(c => c.name);
+    
+    // 取得目前「使用中」的油墨名稱
+    const currentActiveNames = RISO_INKS.filter(ink => ink.active).map(ink => ink.name);
 
-    coreInks.forEach(coreInk => {
-        let existingInk = RISO_INKS.find(ink => ink.name === coreInk.name);
-        if (!existingInk || !existingInk.active) allAlreadyActive = false;
-    });
+    // 判斷是否「剛好」只啟用這些常用油墨
+    const isExactlyCore = currentActiveNames.length === coreNames.length && 
+                          coreNames.every(name => currentActiveNames.includes(name));
 
-    if (allAlreadyActive) {
+    if (isExactlyCore) {
+        // 如果已經是純常用油墨狀態，閃爍提示即可
         const badges = document.querySelectorAll('#active-inks-display .ink-badge');
         badges.forEach(badge => {
-            const nameSpan = badge.querySelector('span');
-            if (nameSpan && coreNames.includes(nameSpan.innerText.trim())) {
-                badge.classList.remove('flash-anim');
-                void badge.offsetWidth; 
-                badge.classList.add('flash-anim');
-            }
+            badge.classList.remove('flash-anim');
+            void badge.offsetWidth; 
+            badge.classList.add('flash-anim');
         });
         return;
     }
 
+    // 核心邏輯：將常用名單內的設為啟用，其他的設為停用 (移回倉庫)
+    RISO_INKS.forEach(ink => {
+        if (coreNames.includes(ink.name)) {
+            ink.active = true;
+        } else {
+            ink.active = false;
+        }
+    });
+
+    // 防呆：如果常用油墨曾經被使用者永久刪除，就把它重新補回來
     coreInks.forEach(coreInk => {
         let existingInk = RISO_INKS.find(ink => ink.name === coreInk.name);
-        if (existingInk) existingInk.active = true;
-        else {
+        if (!existingInk) {
             let newInk = { name: coreInk.name, hex: coreInk.hex, active: true };
             computeInkProperties(newInk);
             RISO_INKS.push(newInk);
         }
     });
+
     renderInkLibrary();
 }
 
@@ -573,7 +614,7 @@ function processImport() {
         }
     });
     
-    alert(`成功匯入/更新了 ${importedCount} 筆油墨！\n(新匯入的油墨將預設為「使用中」狀態)`);
+    alert(`成功匯入/更新了 ${importedCount} 筆油墨！\n(新匯入的油墨將加入候選油墨列表)`);
     closeImportModal();
     renderInkLibrary();
 }
@@ -687,17 +728,49 @@ function getContrastYIQ(hexcolor){
 }
 
 function mixInksOptimized(inks, weights) {
-    let c=0, m=0, y=0;
-    for(let i=0; i<inks.length; i++) {
+    let c = 0, m = 0, y = 0;
+    let goldWeight = 0;
+    let goldInk = null;
+
+    // 1. 先計算所有「非金色」（透明）油墨的 CMY 疊加
+    for(let i = 0; i < inks.length; i++) {
         let w = weights[i];
-        c += inks[i].c * w;
-        m += inks[i].m * w;
-        y += inks[i].y * w;
+        if (inks[i].name === "金") {
+            // 遇到金色先記下來，不加入一般透明疊加計算
+            goldWeight = w;
+            goldInk = inks[i];
+        } else {
+            c += inks[i].c * w;
+            m += inks[i].m * w;
+            y += inks[i].y * w;
+        }
     }
+
+    // 2. 將底層透明油墨的 CMY 轉換回 RGB
+    let baseR = Math.max(0, 1 - Math.min(1, c)) * 255;
+    let baseG = Math.max(0, 1 - Math.min(1, m)) * 255;
+    let baseB = Math.max(0, 1 - Math.min(1, y)) * 255;
+
+    // 3. 處理「金色」的覆蓋物理特性 (Alpha Blending)
+    if (goldWeight > 0 && goldInk) {
+        // 設定金色的最高覆蓋率為 95% (0.95)，隨油墨濃度遞增
+        let alpha = goldWeight * 0.95; 
+        
+        // 還原金色本身的 RGB 顏色
+        let gR = (1 - goldInk.c) * 255;
+        let gG = (1 - goldInk.m) * 255;
+        let gB = (1 - goldInk.y) * 255;
+
+        // 圖層混合公式：(頂層顏色 * 頂層不透明度) + (底層顏色 * (1 - 頂層不透明度))
+        baseR = gR * alpha + baseR * (1 - alpha);
+        baseG = gG * alpha + baseG * (1 - alpha);
+        baseB = gB * alpha + baseB * (1 - alpha);
+    }
+
     return {
-        r: Math.round(Math.max(0, 1 - Math.min(1, c)) * 255),
-        g: Math.round(Math.max(0, 1 - Math.min(1, m)) * 255),
-        b: Math.round(Math.max(0, 1 - Math.min(1, y)) * 255)
+        r: Math.round(baseR),
+        g: Math.round(baseG),
+        b: Math.round(baseB)
     };
 }
 
@@ -796,7 +869,7 @@ function calculateColors() {
 
     const forcedInksSet = new Set(targets.map(t => t.forceInk).filter(name => name !== ""));
     if (forcedInksSet.size > maxInks) {
-        return alert(`衝突：你總共允許 ${maxInks} 色，但各色票卻強制綁定了 ${forcedInksSet.size} 種不同油墨。`);
+        return alert(`指定了 ${forcedInksSet.size} 種不同油墨，請減少至 ${maxInks} 種以下。`);
     }
 
     const combos = getCombinations(activeInksData, maxInks);
@@ -854,7 +927,7 @@ function calculateColors() {
             }
             
             setTimeout(() => {
-                btn.innerHTML = `<i class="bi bi-clipboard-data"></i> 尋找適合的配色方案`;
+                btn.innerHTML = `<i class="bi bi-clipboard-data"></i> 輸出 RISO 配色方案`;
                 btn.classList.remove('btn-success');
                 btn.disabled = false;
             }, 1500);
@@ -998,6 +1071,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function extractDominantColors() {
+    resetAllSettings(); //每次點擊取樣時，先重置所有目標色的限制與油墨設定
+
     const btn = document.getElementById('extract-btn');
     const originalText = btn.innerHTML;
     btn.innerHTML = `<i class="bi bi-arrow-repeat spin-anim"></i> 分析中...`;

@@ -16,14 +16,14 @@
 <body>
 
     <div class="card">
-        <h1>RISO 油墨配色指南</h1>
+        <h1>RISO 油墨混色指南</h1>
         
         <div class="section-divider">
             <div class="library-layout">
                 <div class="library-main">
                     <div class="ink-section">
                         <div class="flex-between" style="position: relative;">
-                            <h3 class="ink-section-title active-title" style="margin: 0; color: var(--text-muted);">使用中的油墨</h3>
+                            <h3 class="ink-section-title active-title" style="margin: 0; color: var(--text-muted);">候選油墨</h3>
                             
                             <div class="action-btn-group desktop-actions">
                                 <button class="btn-action" onclick="openImportModal()"><i class="bi bi-box-arrow-in-down"></i> 匯入</button>
@@ -36,6 +36,7 @@
                             </div>
                             
                             <div id="mobile-more-menu" class="hidden" style="position:absolute; right:0; top:100%; margin-top:0.5rem; background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; padding:0.5rem; display:flex; flex-direction:column; gap:0.5rem; z-index:100; min-width: 140px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                                
                                 <button class="btn-action" style="justify-content:flex-start; font-size:1.2rem;" onclick="openImportModal()"><i class="bi bi-box-arrow-in-down"></i> 匯入清單</button>
                                 <button class="btn-action" style="justify-content:flex-start; font-size:1.2rem;" onclick="openExportModal()"><i class="bi bi-box-arrow-up"></i> 匯出清單</button>
                             </div>
@@ -63,16 +64,16 @@
                             <button class="btn-action mobile-only-btn" onclick="toggleMobileArchive()"><i class="bi bi-check-lg"></i> 完成</button>
                         </div>
                     </div>
-                    <input type="text" class="archive-search-input" id="archive-search" placeholder="搜尋倉庫油墨..." onkeyup="filterArchiveInks(this.value)">
+                    <input type="text" class="archive-search-input" id="archive-search" placeholder="搜尋油墨..." onkeyup="filterArchiveInks(this.value)">
                     <div class="archived-list" id="archived-inks-display"></div>
                 </div>
             </div>
         </div>
 
-        <h2>為多個色票找出配色方案</h2>
+        <h2>挑選一張圖</h2>
         <div class="file-upload-box">
             <div class="upload-text-group">
-                <h3 class="upload-title">從圖片擷取色彩</h3>
+                <!-- <h3 class="upload-title">選一張圖</h3> -->
                 <div class="file-upload-wrapper">
                     <button class="btn-secondary btn-upload"><i class="bi bi-folder-fill"></i> 選擇圖片檔案</button>
                     <input type="file" id="image-upload" accept="image/*">
@@ -81,7 +82,7 @@
             </div>
             <div id="img-preview-container" class="img-preview-box hidden">
                 <canvas id="img-canvas" class="preview-canvas"></canvas>
-                <button class="primary" id="extract-btn" onclick="extractDominantColors()"><i class="bi bi-eyedropper"></i> 擷取出 5 個顏色</button>
+                <button class="primary" id="extract-btn" onclick="extractDominantColors()"><i class="bi bi-eyedropper"></i> 取樣 5 個顏色</button>
             </div>
         </div>
         
@@ -104,6 +105,10 @@
                 <span class="cd-arrow">▼</span>
             </div>
             <div class="cd-panel" id="max-inks-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding: 1.5rem; border-bottom: 0.1rem solid var(--bg-hover);">
+                    <strong style="color:var(--text-muted); font-size: 1.3rem;">欲使用的 Riso 油墨總數</strong>
+                    <i class="bi bi-x-lg" style="cursor:pointer; color:var(--text-muted); font-size: 1.5rem;" onclick="closePanel('max-inks-panel')"></i>
+                </div>
                 <div class="cd-options">
                     <div class="cd-option" onclick="selectMaxInks(2, '2 色')"><span>2 色</span></div>
                     <div class="cd-option" onclick="selectMaxInks(3, '3 色')"><span>3 色</span></div>
@@ -115,12 +120,12 @@
         
         <br>
         <button class="primary btn-block" id="calc-btn" onclick="calculateColors()">
-            <i class="bi bi-clipboard-data"></i> 尋找適合的配色方案
+            <i class="bi bi-clipboard-data"></i> 輸出 RISO 配色方案
         </button>
     </div>
 
     <div class="card hidden" id="result-container">
-        <h2>RISO 油墨組成</h2>
+        <h2>RISO 配色方案</h2>
         <div id="chosen-inks-container" class="mb-4">
             </div>
         <div id="results"></div>
@@ -128,6 +133,7 @@
 
     <div id="export-modal" class="modal-overlay hidden">
         <div class="modal-content">
+            <i class="bi bi-x-lg close-btn-corner" onclick="closeExportModal()"></i>
             <h3 style="margin-top: 0; margin-bottom: 1rem;">匯出油墨清單</h3>
             <div class="modal-btn-row">
                 <button class="btn-secondary" onclick="doExport('active')">僅匯出「使用中」</button>
@@ -143,6 +149,7 @@
 
     <div id="import-modal" class="modal-overlay hidden">
         <div class="modal-content">
+            <i class="bi bi-x-lg close-btn-corner" onclick="closeImportModal()"></i>
             <h3 style="margin-top: 0; margin-bottom: 0.5rem;">匯入油墨清單</h3>
             <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 1rem;">以逗號或空白分隔油墨名稱與色碼（如：金, #c99c65），一行輸入一個顏色。</p>
             <textarea id="import-textarea" placeholder="貼上資料..."></textarea>
