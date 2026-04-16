@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>RISO 油墨組合指南</title>
+    <title>RISO 油墨混色指南</title>
     <link rel="stylesheet" href="main.css">
     <script src="main.js"></script>
 
@@ -14,13 +14,20 @@
 <body>
 
     <div class="card">
-        <h1>RISO 油墨組合指南 (V2.5)</h1>
+        <h1>RISO 油墨混色指南 (V2.7)</h1>
         
         <div class="section-divider">
             <div class="library-layout">
                 <div class="library-main">
                     <div class="ink-section">
-                        <h3 class="ink-section-title active-title">● 使用中的油墨</h3>
+                        <div class="flex-between">
+                            <h3 class="ink-section-title active-title" style="margin: 0;">使用中的油墨</h3>
+                            <div class="action-btn-group">
+                                <button class="btn-action" onclick="openImportModal()"><i class="bi bi-box-arrow-in-down"></i> 匯入</button>
+                                <button class="btn-action" onclick="openExportModal()"><i class="bi bi-box-arrow-up"></i> 匯出</button>
+                                <button class="btn-action" onclick="moveAllToArchive()"><i class="bi bi-archive-fill"></i> 全部移至倉庫</button>
+                            </div>
+                        </div>
                         <div class="ink-library-grid" id="active-inks-display"></div>
                     </div>
                     
@@ -34,7 +41,14 @@
                 </div>
 
                 <div class="library-sidebar">
-                    <h3 class="ink-section-title archive-title">○ 油墨倉庫（不使用的油墨）</h3>
+                    <div class="flex-between">
+                        <h3 class="ink-section-title archive-title" style="margin: 0;">油墨倉庫</h3>
+                        <div class="action-btn-group">
+                            <button class="btn-action" onclick="addDefaultInks()"><i class="bi bi-star-fill"></i> 常用油墨</button>
+                            <button class="btn-action" onclick="enableAllInks()"><i class="bi bi-check-all"></i> 全部啟用</button>
+                        </div>
+                    </div>
+                    <input type="text" class="archive-search-input" id="archive-search" placeholder="搜尋倉庫油墨..." onkeyup="filterArchiveInks(this.value)">
                     <div class="archived-list" id="archived-inks-display"></div>
                 </div>
             </div>
@@ -43,7 +57,7 @@
         <h2>目標色彩設定</h2>
         <div class="file-upload-box">
             <div>
-                <h3 class="upload-title">從圖片擷取目標色彩</h3>
+                <h3 class="upload-title">從圖片擷取色彩</h3>
                 <div class="file-upload-wrapper">
                     <button class="btn-secondary btn-upload"><i class="bi bi-folder-fill"></i> 選擇圖片檔案</button>
                     <input type="file" id="image-upload" accept="image/*">
@@ -52,7 +66,7 @@
             </div>
             <div id="img-preview-container" class="img-preview-box hidden">
                 <canvas id="img-canvas" class="preview-canvas"></canvas>
-                <button class="primary" id="extract-btn" onclick="extractDominantColors()"><i class="bi bi-magic"></i> 擷取 5 個目標色</button>
+                <button class="primary" id="extract-btn" onclick="extractDominantColors()"><i class="bi bi-eyedropper"></i> 擷取出 5 個顏色</button>
             </div>
         </div>
         
@@ -86,15 +100,42 @@
         
         <br>
         <button class="primary" id="calc-btn" onclick="calculateColors()">
-            <i class="bi bi-clipboard-data"></i> 分析 RISO 油墨組合
+            <i class="bi bi-clipboard-data"></i> 查看 RISO 油墨組成建議
         </button>
     </div>
 
     <div class="card hidden" id="result-container">
-        <h2>RISO 油墨組合</h2>
+        <h2>RISO 油墨組成建議</h2>
         <div id="chosen-inks-container" class="mb-4">
             </div>
         <div id="results"></div>
+    </div>
+
+    <div id="export-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 style="margin-top: 0; margin-bottom: 1rem;">匯出油墨清單</h3>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                <button class="btn-secondary" onclick="doExport('active')">僅匯出「使用中油墨」</button>
+                <button class="btn-secondary" onclick="doExport('all')">匯出全部油墨</button>
+            </div>
+            <textarea id="export-textarea" readonly placeholder="點擊上方按鈕產生清單..."></textarea>
+            <div class="modal-actions">
+                <button class="primary" id="btn-copy-export" onclick="copyExport()"><i class="bi bi-copy"></i> 複製內容</button>
+                <button class="btn-secondary" onclick="closeExportModal()">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="import-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 style="margin-top: 0; margin-bottom: 1rem;">匯入油墨清單</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">請輸入顏色名稱和色碼，並以逗號或空白分隔（如: 金, #c99c65），每行代表一個顏色。</p>
+            <textarea id="import-textarea" placeholder="貼上資料..."></textarea>
+            <div class="modal-actions">
+                <button class="primary" onclick="processImport()"><i class="bi bi-check-lg"></i> 確認匯入</button>
+                <button class="btn-secondary" onclick="closeImportModal()">取消</button>
+            </div>
+        </div>
     </div>
 </body>
 </html>

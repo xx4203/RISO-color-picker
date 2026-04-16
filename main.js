@@ -1,19 +1,21 @@
+let defaultActives = ["黑", "金", "青", "螢光粉", "赤紅", "黃", "若葉綠", "薄荷綠"];
+
 let RISO_INKS = [
-    { name: "金", hex: "#c99c65", active: true }, { name: "黑", hex: "#000000", active: true },
-    { name: "鈍灰", hex: "#3d3d3f", active: true }, { name: "灰", hex: "#272727", active: true },
-    { name: "白", hex: "#ffffff", active: true }, { name: "茶", hex: "#5c281a", active: true },
-    { name: "黃土", hex: "#754a15", active: true }, { name: "水", hex: "#5196d5", active: true },
-    { name: "天空", hex: "#68c7eb", active: true }, { name: "青", hex: "#1c6cb1", active: true },
-    { name: "濃紺", hex: "#283a7f", active: true }, { name: "紫", hex: "#3c2657", active: true },
-    { name: "酒紅", hex: "#671f2f", active: true }, { name: "薰衣紫", hex: "#7259c4", active: true },
-    { name: "桃粉", hex: "#ea6d87", active: true }, { name: "赤紅", hex: "#b3181e", active: true },
-    { name: "朱紅", hex: "#ea390e", active: true }, { name: "橙", hex: "#f19a38", active: true },
-    { name: "黃", hex: "#fef104", active: true }, { name: "黄綠", hex: "#dae000", active: true },
-    { name: "若葉綠", hex: "#009140", active: true }, { name: "濃綠", hex: "#0e525d", active: true },
-    { name: "湖水綠", hex: "#008982", active: true }, { name: "薄荷綠", hex: "#5ebfc7", active: true },
-    { name: "珊瑚粉", hex: "#f5b4b1", active: true }, { name: "螢光紅", hex: "#fe3741", active: true },
-    { name: "螢光粉", hex: "#fd59aa", active: true }, { name: "螢光橘", hex: "#fc5938", active: true },
-    { name: "螢光綠", hex: "#79fd83", active: true }, { name: "螢光黃", hex: "#fdff78", active: true }
+    { name: "金", hex: "#c99c65", active: defaultActives.includes("金") }, { name: "黑", hex: "#000000", active: defaultActives.includes("黑") },
+    { name: "鈍灰", hex: "#3d3d3f", active: defaultActives.includes("鈍灰") }, { name: "灰", hex: "#272727", active: defaultActives.includes("灰") },
+    { name: "白", hex: "#ffffff", active: defaultActives.includes("白") }, { name: "茶", hex: "#5c281a", active: defaultActives.includes("茶") },
+    { name: "黃土", hex: "#754a15", active: defaultActives.includes("黃土") }, { name: "水", hex: "#5196d5", active: defaultActives.includes("水") },
+    { name: "天空", hex: "#68c7eb", active: defaultActives.includes("天空") }, { name: "青", hex: "#1c6cb1", active: defaultActives.includes("青") },
+    { name: "濃紺", hex: "#283a7f", active: defaultActives.includes("濃紺") }, { name: "紫", hex: "#3c2657", active: defaultActives.includes("紫") },
+    { name: "酒紅", hex: "#671f2f", active: defaultActives.includes("酒紅") }, { name: "薰衣紫", hex: "#7259c4", active: defaultActives.includes("薰衣紫") },
+    { name: "桃粉", hex: "#ea6d87", active: defaultActives.includes("桃粉") }, { name: "赤紅", hex: "#b3181e", active: defaultActives.includes("赤紅") },
+    { name: "朱紅", hex: "#ea390e", active: defaultActives.includes("朱紅") }, { name: "橙", hex: "#f19a38", active: defaultActives.includes("橙") },
+    { name: "黃", hex: "#fef104", active: defaultActives.includes("黃") }, { name: "黄綠", hex: "#dae000", active: defaultActives.includes("黄綠") },
+    { name: "若葉綠", hex: "#00A95C", active: defaultActives.includes("若葉綠") }, { name: "濃綠", hex: "#0e525d", active: defaultActives.includes("濃綠") },
+    { name: "湖水綠", hex: "#008982", active: defaultActives.includes("湖水綠") }, { name: "薄荷綠", hex: "#5ebfc7", active: defaultActives.includes("薄荷綠") },
+    { name: "珊瑚粉", hex: "#f5b4b1", active: defaultActives.includes("珊瑚粉") }, { name: "螢光紅", hex: "#fe3741", active: defaultActives.includes("螢光紅") },
+    { name: "螢光粉", hex: "#fd59aa", active: defaultActives.includes("螢光粉") }, { name: "螢光橘", hex: "#fc5938", active: defaultActives.includes("螢光橘") },
+    { name: "螢光綠", hex: "#79fd83", active: defaultActives.includes("螢光綠") }, { name: "螢光黃", hex: "#fdff78", active: defaultActives.includes("螢光黃") }
 ];
 
 function computeInkProperties(ink) {
@@ -28,6 +30,7 @@ function computeInkProperties(ink) {
 RISO_INKS.forEach(computeInkProperties);
 
 let editingIndex = -1;
+let archiveSearchKeyword = "";
 let targetColorStates = [
     { hex: "#005b4b", limit: 0, forceInk: "" }, { hex: "#a52a2a", limit: 0, forceInk: "" },
     { hex: "#4682b4", limit: 0, forceInk: "" }, { hex: "#32cd32", limit: 0, forceInk: "" },
@@ -47,7 +50,7 @@ function saveTargetStates() {
 
 function updateExtractBtnText() {
     const extractBtn = document.getElementById('extract-btn');
-    if(extractBtn) extractBtn.innerHTML = `<i class="bi bi-magic"></i> 擷取 ${targetColorStates.length} 個目標色`;
+    if(extractBtn) extractBtn.innerHTML = `<i class="bi bi-eyedropper"></i> 擷取出 ${targetColorStates.length} 個顏色`;
 }
 
 function addTargetColor() {
@@ -66,7 +69,6 @@ function removeTargetColor(index) {
     updateExtractBtnText();
 }
 
-// 新增：清除所有設定
 function resetAllSettings() {
     targetColorStates.forEach(t => {
         t.limit = 0;
@@ -75,7 +77,6 @@ function resetAllSettings() {
     renderTargetBoxes();
 }
 
-// 下拉選單的快速清除事件 (攔截點擊)
 function clearLimit(boxIndex, event) {
     event.stopPropagation();
     selectLimit(boxIndex, 0, '不限混合數');
@@ -97,10 +98,6 @@ function renderTargetBoxes() {
     container.innerHTML = '';
     
     targetColorStates.forEach((t, i) => {
-        // 判斷是否要顯示清除按鈕
-        // 直接刪除 showLimitClear 跟 showInkClear 這兩行常數
-
-        // 替換 HTML 組合如下：
         container.innerHTML += `
             <div class="color-box" id="target-box-${i}">
                 <button class="btn-delete-box" onclick="removeTargetColor(${i})" title="刪除此色票"><i class="bi bi-x"></i></button>
@@ -167,7 +164,6 @@ function selectLimit(boxIndex, value, text) {
     document.getElementById(`limit-text-${boxIndex}`).innerText = text;
     document.getElementById(`limit-panel-${boxIndex}`).classList.remove('show');
     
-    // 動態切換 X 按鈕與箭頭的顯示
     const clearIcon = document.getElementById(`limit-clear-icon-${boxIndex}`);
     const arrowIcon = document.getElementById(`limit-arrow-${boxIndex}`);
     if (value === 0) {
@@ -226,6 +222,49 @@ window.onclick = function(event) {
     }
 }
 
+// ==================== 油墨庫渲染與批次管理 ====================
+function moveAllToArchive() {
+    RISO_INKS.forEach(ink => ink.active = false);
+    renderInkLibrary();
+}
+
+function enableAllInks() {
+    RISO_INKS.forEach(ink => ink.active = true);
+    renderInkLibrary();
+}
+
+// 新增：加入預設常用油墨
+function addDefaultInks() {
+    const coreInks = [
+        { name: "黑", hex: "#000000" }, { name: "金", hex: "#c99c65" },
+        { name: "青", hex: "#1c6cb1" }, { name: "螢光粉", hex: "#fd59aa" },
+        { name: "赤紅", hex: "#b3181e" }, { name: "黃", hex: "#fef104" },
+        { name: "若葉綠", hex: "#00A95C" }, { name: "薄荷綠", hex: "#5ebfc7" }
+    ];
+
+    coreInks.forEach(coreInk => {
+        // 先找找看原本的油墨庫裡是否已經有這個顏色
+        let existingInk = RISO_INKS.find(ink => ink.name === coreInk.name);
+        
+        if (existingInk) {
+            // 如果在倉庫裡，就把它重新啟用
+            existingInk.active = true;
+        } else {
+            // 如果使用者先前把它「永久刪除」了，就自動幫它建立回來
+            let newInk = { name: coreInk.name, hex: coreInk.hex, active: true };
+            computeInkProperties(newInk);
+            RISO_INKS.push(newInk);
+        }
+    });
+    
+    renderInkLibrary();
+}
+
+function filterArchiveInks(keyword) {
+    archiveSearchKeyword = keyword.toLowerCase();
+    renderInkLibrary();
+}
+
 function renderInkLibrary() {
     const activeContainer = document.getElementById('active-inks-display');
     const archivedContainer = document.getElementById('archived-inks-display');
@@ -233,22 +272,122 @@ function renderInkLibrary() {
     archivedContainer.innerHTML = '';
 
     RISO_INKS.forEach((ink, index) => {
+        let actionButtons = `
+            <button class="btn-icon" onclick="editInk(${index})" title="編輯"><i class="bi bi-pencil-fill"></i></button>
+            <button class="btn-icon" onclick="toggleInk(${index})" title="${ink.active ? '移入倉庫' : '啟用'}">
+                <i class="bi ${ink.active ? 'bi-x-lg' : 'bi-plus-lg'}"></i>
+            </button>
+        `;
+        
+        if (!ink.active) {
+            if (archiveSearchKeyword && !ink.name.toLowerCase().includes(archiveSearchKeyword)) {
+                return; 
+            }
+            actionButtons += `
+                <button class="btn-icon btn-icon-danger" onclick="deleteInk(${index})" title="永久刪除"><i class="bi bi-trash-fill"></i></button>
+            `;
+        }
+
         const badgeHTML = `
             <div class="ink-badge ${ink.active ? '' : 'archived'}">
                 <div class="ink-badge-color" style="background: ${ink.hex};"></div>
-                <span style="font-weight:500;">${ink.name}</span>
-                <button class="btn-icon" onclick="editInk(${index})" title="編輯"><i class="bi bi-pencil-fill"></i></button>
-                <button class="btn-icon" onclick="toggleInk(${index})" title="${ink.active ? '移入倉庫' : '啟用'}">
-                    <i class="bi ${ink.active ? 'bi-x-lg' : 'bi-plus-lg'}"></i>
-                </button>
+                <span style="font-weight:500; margin-right: auto; padding-right: 0.5rem;">${ink.name}</span>
+                ${actionButtons}
             </div>
         `;
+        
         if (ink.active) activeContainer.innerHTML += badgeHTML;
         else archivedContainer.innerHTML += badgeHTML;
     });
     updateTargetDropdowns();
 }
 
+function deleteInk(index) {
+    const inkName = RISO_INKS[index].name;
+    if (confirm(`確定要永久刪除「${inkName}」嗎？這個動作無法復原。`)) {
+        RISO_INKS.splice(index, 1);
+        if (editingIndex === index) {
+            cancelEdit();
+        } else if (editingIndex > index) {
+            editingIndex--;
+        }
+        renderInkLibrary();
+    }
+}
+
+// ==================== 匯出與匯入功能 ====================
+function openExportModal() {
+    document.getElementById('export-modal').classList.remove('hidden');
+    document.getElementById('export-textarea').value = '';
+    const copyBtn = document.getElementById('btn-copy-export');
+    copyBtn.innerHTML = '<i class="bi bi-copy"></i> 複製內容';
+    copyBtn.classList.remove('btn-success');
+}
+
+function closeExportModal() {
+    document.getElementById('export-modal').classList.add('hidden');
+}
+
+function doExport(type) {
+    const list = type === 'active' ? RISO_INKS.filter(i => i.active) : RISO_INKS;
+    const str = list.map(i => `${i.name}, ${i.hex}`).join('\n');
+    document.getElementById('export-textarea').value = str;
+}
+
+function copyExport() {
+    const textarea = document.getElementById('export-textarea');
+    if (!textarea.value) return alert("沒有內容可以複製！請先點擊上方按鈕產生清單。");
+    navigator.clipboard.writeText(textarea.value).then(() => {
+        const copyBtn = document.getElementById('btn-copy-export');
+        copyBtn.innerHTML = '<i class="bi bi-check-lg"></i> 已複製';
+        copyBtn.classList.add('btn-success');
+    });
+}
+
+function openImportModal() {
+    document.getElementById('import-modal').classList.remove('hidden');
+    document.getElementById('import-textarea').value = '';
+}
+
+function closeImportModal() {
+    document.getElementById('import-modal').classList.add('hidden');
+}
+
+function processImport() {
+    const text = document.getElementById('import-textarea').value;
+    const lines = text.split('\n');
+    let importedCount = 0;
+    
+    lines.forEach(line => {
+        let str = line.trim();
+        if (!str) return;
+        
+        let hexMatch = str.match(/(#[0-9A-Fa-f]{6})/);
+        if (!hexMatch) return;
+        
+        let hex = hexMatch[1];
+        let name = str.replace(hex, '').replace(/,/g, '').trim();
+        
+        if (name && hex) {
+            let existing = RISO_INKS.find(i => i.name === name);
+            if (existing) {
+                existing.hex = hex;
+                computeInkProperties(existing);
+            } else {
+                let newInk = { name: name, hex: hex, active: true };
+                computeInkProperties(newInk);
+                RISO_INKS.push(newInk);
+            }
+            importedCount++;
+        }
+    });
+    
+    alert(`成功匯入/更新了 ${importedCount} 筆油墨！\n(新匯入的油墨將預設為「使用中」狀態)`);
+    closeImportModal();
+    renderInkLibrary();
+}
+
+// ==================== 油墨更新與選單同步 ====================
 function updateTargetDropdowns() {
     const activeInks = RISO_INKS.filter(ink => ink.active);
     
@@ -502,14 +641,14 @@ function calculateColors() {
             if (globalBestCombo) {
                 renderResults(targets, globalBestCombo, globalBestResults);
             } else {
-                alert("找不到符合所有限制條件的油墨組合。");
+                alert("找不到符合所有限制條件的油墨組成。");
             }
             
             btn.innerHTML = `<i class="bi bi-check-lg"></i> 已完成`;
             btn.classList.add('btn-success');
             
             setTimeout(() => {
-                btn.innerHTML = `<i class="bi bi-clipboard-data"></i> 分析 RISO 油墨組合`;
+                btn.innerHTML = `<i class="bi bi-clipboard-data"></i> 查看 RISO 油墨組成建議`;
                 btn.classList.remove('btn-success');
                 btn.disabled = false;
             }, 1500);
@@ -523,7 +662,7 @@ function renderResults(targets, combo, results) {
     resultContainer.classList.remove('hidden');
     
     const container = document.getElementById('chosen-inks-container');
-    let badgesHTML = '<strong class="result-summary-title">選用油墨組合：</strong>';
+    let badgesHTML = '<strong class="result-summary-title">選用油墨：</strong>';
     badgesHTML += '<div class="result-badge-container">';
     badgesHTML += combo.map(i => `
         <div class="ink-badge result-ink-badge">
@@ -541,19 +680,15 @@ function renderResults(targets, combo, results) {
         const targetHex = `#${(1 << 24 | target.rgb.r << 16 | target.rgb.g << 8 | target.rgb.b).toString(16).slice(1)}`;
         const mixedHex = `#${(1 << 24 | r.mixed.r << 16 | r.mixed.g << 8 | r.mixed.b).toString(16).slice(1)}`;
 
-        // 1. 統一在長條圖上方組裝標籤 (靠右對齊)
         let tagsHeaderHTML = '';
         let limitTagHTML = '';
         let forceTagHTML = '';
 
-        // 處理「限 X 色」標籤
         if (target.limit > 0) {
             limitTagHTML = `<span class="r-tag tag-limit">限 ${target.limit} 色</span>`;
         }
 
-        // 處理「指定油墨」標籤
         if (target.forceInk) {
-            // 從總油墨庫中找出該油墨的色碼，用來決定標籤底色與文字顏色
             const forcedInkData = RISO_INKS.find(i => i.name === target.forceInk);
             if (forcedInkData) {
                 let textColor = getContrastYIQ(forcedInkData.hex);
@@ -561,7 +696,6 @@ function renderResults(targets, combo, results) {
             }
         }
 
-        // 如果有任何標籤，就用 flex 容器包起來並靠右對齊
         if (limitTagHTML || forceTagHTML) {
             tagsHeaderHTML = `
                 <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 8px;">
@@ -590,7 +724,6 @@ function renderResults(targets, combo, results) {
             if(pct > 0) {
                 let textColor = getContrastYIQ(ink.hex);
                 
-                // 移除了原本寫死在名稱旁邊的標籤與 inline style，恢復 CSS 原本乾淨的排版
                 itemHTML += `
                     <div class="result-bar-row">
                         <div class="result-bar-label">${ink.name}</div>
@@ -624,8 +757,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             fileNameDisplay.innerText = file.name;
-
-            // 新增：當上傳新圖片時，清除所有色票的條件限制
             resetAllSettings();
 
             const reader = new FileReader();
