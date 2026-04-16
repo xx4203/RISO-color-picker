@@ -216,9 +216,38 @@ function filterDropdown(boxIndex, keyword) {
     });
 }
 
+// ==================== 手機版顯示控制與視窗點擊事件 ====================
+function toggleMobileMore(e) {
+    e.stopPropagation();
+    const menu = document.getElementById('mobile-more-menu');
+    if(menu) menu.classList.toggle('hidden');
+}
+
+function toggleMobileArchive() {
+    const sidebar = document.getElementById('mobile-archive-section');
+    sidebar.classList.toggle('show-mobile-flex');
+    if (sidebar.classList.contains('show-mobile-flex')) {
+        document.querySelector('.add-ink-form').classList.remove('show-mobile-flex');
+    }
+}
+
+function showMobileAddInk() {
+    document.querySelector('.add-ink-form').classList.add('show-mobile-flex');
+    document.getElementById('mobile-archive-section').classList.remove('show-mobile-flex');
+    setTimeout(() => document.getElementById('form-ink-name').focus(), 100);
+}
+
+function jumpToAddInkFromArchive() {
+    showMobileAddInk();
+}
+
 window.onclick = function(event) {
     if (!event.target.closest('.custom-dropdown')) {
         document.querySelectorAll('.cd-panel').forEach(p => p.classList.remove('show'));
+    }
+    if (!event.target.closest('#mobile-more-menu') && !event.target.closest('#mobile-more-btn')) {
+        const menu = document.getElementById('mobile-more-menu');
+        if(menu) menu.classList.add('hidden');
     }
 }
 
@@ -233,7 +262,6 @@ function enableAllInks() {
     renderInkLibrary();
 }
 
-// 新增：加入預設常用油墨
 function addDefaultInks() {
     const coreInks = [
         { name: "黑", hex: "#000000" }, { name: "金", hex: "#c99c65" },
@@ -243,20 +271,15 @@ function addDefaultInks() {
     ];
 
     coreInks.forEach(coreInk => {
-        // 先找找看原本的油墨庫裡是否已經有這個顏色
         let existingInk = RISO_INKS.find(ink => ink.name === coreInk.name);
-        
         if (existingInk) {
-            // 如果在倉庫裡，就把它重新啟用
             existingInk.active = true;
         } else {
-            // 如果使用者先前把它「永久刪除」了，就自動幫它建立回來
             let newInk = { name: coreInk.name, hex: coreInk.hex, active: true };
             computeInkProperties(newInk);
             RISO_INKS.push(newInk);
         }
     });
-    
     renderInkLibrary();
 }
 
@@ -299,6 +322,14 @@ function renderInkLibrary() {
         if (ink.active) activeContainer.innerHTML += badgeHTML;
         else archivedContainer.innerHTML += badgeHTML;
     });
+
+    // 加上手機版專屬的「新增油墨」按鈕 Tag
+    activeContainer.innerHTML += `
+        <div class="ink-badge mobile-add-badge" onclick="showMobileAddInk()">
+            <i class="bi bi-plus-lg"></i> <span style="font-weight:500;">新增油墨</span>
+        </div>
+    `;
+
     updateTargetDropdowns();
 }
 
@@ -432,6 +463,8 @@ function editInk(index) {
     submitBtn.innerText = '儲存';
     submitBtn.classList.add('btn-save');
     document.getElementById('form-btn-cancel').classList.remove('hidden');
+    
+    if (window.innerWidth <= 768) showMobileAddInk();
 }
 
 function cancelEdit() {
@@ -648,7 +681,7 @@ function calculateColors() {
             btn.classList.add('btn-success');
             
             setTimeout(() => {
-                btn.innerHTML = `<i class="bi bi-clipboard-data"></i> 查看 RISO 油墨組成建議`;
+                btn.innerHTML = `<i class="bi bi-clipboard-data"></i> 查看 RISO 油墨組成`;
                 btn.classList.remove('btn-success');
                 btn.disabled = false;
             }, 1500);
@@ -705,16 +738,19 @@ function renderResults(targets, combo, results) {
             `;
         }
 
+        // 修改這裡：加入了 swatches-group 統一將目標色與疊印色綑綁，確保間距不會因為螢幕改變而跑掉
         let itemHTML = `
             <div class="result-item">
                 <div class="compare-row">
-                    <div class="preview-label-container">
-                        <div class="preview-swatch" style="background: ${targetHex};"></div>
-                        <div class="preview-label">目標色 ${index+1}</div>
-                    </div>
-                    <div class="preview-label-container">
-                        <div class="preview-swatch" style="background: ${mixedHex};"></div>
-                        <div class="preview-label">模擬疊印</div>
+                    <div class="swatches-group">
+                        <div class="preview-label-container">
+                            <div class="preview-swatch" style="background: ${targetHex};"></div>
+                            <div class="preview-label">目標色 ${index+1}</div>
+                        </div>
+                        <div class="preview-label-container">
+                            <div class="preview-swatch" style="background: ${mixedHex};"></div>
+                            <div class="preview-label">模擬疊印</div>
+                        </div>
                     </div>
                     <div class="bar-chart-container">
                         ${tagsHeaderHTML} `;
