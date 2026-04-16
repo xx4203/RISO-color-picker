@@ -16,7 +16,6 @@ let RISO_INKS = [
     { name: "螢光綠", hex: "#79fd83", active: true }, { name: "螢光黃", hex: "#fdff78", active: true }
 ];
 
-// 效能優化 1: 預先計算所有油墨的 RGB 與 CMY 值，避免在迴圈內重複 Parse
 function computeInkProperties(ink) {
     let bigint = parseInt(ink.hex.replace('#', ''), 16);
     ink.r = (bigint >> 16) & 255;
@@ -67,6 +66,26 @@ function removeTargetColor(index) {
     updateExtractBtnText();
 }
 
+// 新增：清除所有設定
+function resetAllSettings() {
+    targetColorStates.forEach(t => {
+        t.limit = 0;
+        t.forceInk = "";
+    });
+    renderTargetBoxes();
+}
+
+// 下拉選單的快速清除事件 (攔截點擊)
+function clearLimit(boxIndex, event) {
+    event.stopPropagation();
+    selectLimit(boxIndex, 0, '不限混合數');
+}
+
+function clearInk(boxIndex, event) {
+    event.stopPropagation();
+    selectInk(boxIndex, '', '');
+}
+
 function getLimitText(val) {
     if (val === 1) return '限制單色';
     if (val === 2) return '最多兩色混合';
@@ -78,6 +97,10 @@ function renderTargetBoxes() {
     container.innerHTML = '';
     
     targetColorStates.forEach((t, i) => {
+        // 判斷是否要顯示清除按鈕
+        // 直接刪除 showLimitClear 跟 showInkClear 這兩行常數
+
+        // 替換 HTML 組合如下：
         container.innerHTML += `
             <div class="color-box" id="target-box-${i}">
                 <button class="btn-delete-box" onclick="removeTargetColor(${i})" title="刪除此色票"><i class="bi bi-x"></i></button>
@@ -87,6 +110,8 @@ function renderTargetBoxes() {
                 <div class="custom-dropdown" id="limit-cd-${i}">
                     <div class="cd-selected" onclick="toggleDropdown('limit-panel-${i}')">
                         <span id="limit-text-${i}" class="cd-text-grow">${getLimitText(t.limit)}</span>
+                        <i class="bi bi-x-circle-fill cd-clear-btn ${t.limit !== 0 ? '' : 'hidden'}" id="limit-clear-icon-${i}" onclick="clearLimit(${i}, event)" title="重置為不限"></i>
+                        <span class="cd-arrow ${t.limit === 0 ? '' : 'hidden'}" id="limit-arrow-${i}">▼</span>
                     </div>
                     <div class="cd-panel" id="limit-panel-${i}">
                         <div class="cd-options">
@@ -101,7 +126,9 @@ function renderTargetBoxes() {
                 <div class="custom-dropdown" id="ink-cd-${i}">
                     <div class="cd-selected" onclick="toggleDropdown('ink-panel-${i}', true)">
                         <div class="cd-swatch cd-none-swatch" id="ink-swatch-${i}"></div>
-                        <span id="ink-text-${i}" class="cd-text-truncate">（不指定）</span>
+                        <span id="ink-text-${i}" class="cd-text-truncate">不指定</span>
+                        <i class="bi bi-x-circle-fill cd-clear-btn ${t.forceInk !== '' ? '' : 'hidden'}" id="ink-clear-icon-${i}" onclick="clearInk(${i}, event)" title="重置為不指定"></i>
+                        <span class="cd-arrow ${t.forceInk === '' ? '' : 'hidden'}" id="ink-arrow-${i}">▼</span>
                     </div>
                     <div class="cd-panel" id="ink-panel-${i}">
                         <div class="cd-search-box">
@@ -139,24 +166,43 @@ function selectLimit(boxIndex, value, text) {
     document.getElementById(`limit-val-${boxIndex}`).value = value;
     document.getElementById(`limit-text-${boxIndex}`).innerText = text;
     document.getElementById(`limit-panel-${boxIndex}`).classList.remove('show');
+    
+    // 動態切換 X 按鈕與箭頭的顯示
+    const clearIcon = document.getElementById(`limit-clear-icon-${boxIndex}`);
+    const arrowIcon = document.getElementById(`limit-arrow-${boxIndex}`);
+    if (value === 0) {
+        clearIcon.classList.add('hidden');
+        arrowIcon.classList.remove('hidden');
+    } else {
+        clearIcon.classList.remove('hidden');
+        arrowIcon.classList.add('hidden');
+    }
+    saveTargetStates();
 }
 
 function selectInk(boxIndex, inkName, inkHex) {
     const valInput = document.getElementById(`ink-val-${boxIndex}`);
     const textSpan = document.getElementById(`ink-text-${boxIndex}`);
     const swatchDiv = document.getElementById(`ink-swatch-${boxIndex}`);
+    const clearIcon = document.getElementById(`ink-clear-icon-${boxIndex}`);
+    const arrowIcon = document.getElementById(`ink-arrow-${boxIndex}`);
     
     valInput.value = inkName;
-    textSpan.innerText = inkName || '（不指定）';
+    textSpan.innerText = inkName || '不指定';
     
     if (inkName) {
         swatchDiv.style.background = inkHex;
         swatchDiv.classList.remove('cd-none-swatch');
+        clearIcon.classList.remove('hidden');
+        arrowIcon.classList.add('hidden');
     } else {
         swatchDiv.style.background = 'transparent';
         swatchDiv.classList.add('cd-none-swatch');
+        clearIcon.classList.add('hidden');
+        arrowIcon.classList.remove('hidden');
     }
     document.getElementById(`ink-panel-${boxIndex}`).classList.remove('show');
+    saveTargetStates();
 }
 
 function selectMaxInks(val, text) {
@@ -211,7 +257,7 @@ function updateTargetDropdowns() {
         if(!optionsContainer) continue; 
 
         const currentVal = document.getElementById(`ink-val-${i}`).value;
-        let html = `<div class="cd-option" onclick="selectInk(${i}, '', '')"><span>（不指定）</span></div>`;
+        let html = `<div class="cd-option" onclick="selectInk(${i}, '', '')"><span>不指定</span></div>`;
         
         activeInks.forEach(ink => {
             html += `
@@ -301,7 +347,6 @@ function getContrastYIQ(hexcolor){
     return (yiq >= 128) ? 'black' : 'white';
 }
 
-// 效能優化 2: 採用預先算好的 CMY 值，避免數學轉換
 function mixInksOptimized(inks, weights) {
     let c=0, m=0, y=0;
     for(let i=0; i<inks.length; i++) {
@@ -317,7 +362,6 @@ function mixInksOptimized(inks, weights) {
     };
 }
 
-// 效能優化 3: 採用平方差比較，省去耗時的 Math.sqrt
 function colorDistSq(c1, c2) {
     let dr = c1.r - c2.r;
     let dg = c1.g - c2.g;
@@ -394,7 +438,6 @@ function findBestWeightsForTarget(target, inkCombo) {
     return runSearchPhase(fineStepArrays);
 }
 
-// 效能優化 4: 異步分塊運算 (Chunking) 防止畫面卡死並支援動畫
 function calculateColors() {
     const btn = document.getElementById('calc-btn');
     saveTargetStates();
@@ -422,12 +465,11 @@ function calculateColors() {
     let globalBestCombo = null;
     let globalBestResults = null;
 
-    // UI 動畫啟動
     btn.innerHTML = `<i class="bi bi-arrow-repeat spin-anim"></i> 運算中... (0%)`;
     btn.disabled = true;
 
     let comboIndex = 0;
-    const CHUNK_SIZE = 500; // 每處理 500 個組合，休息一次讓 UI 更新
+    const CHUNK_SIZE = 500; 
 
     function processChunk() {
         let end = Math.min(comboIndex + CHUNK_SIZE, combos.length);
@@ -453,31 +495,26 @@ function calculateColors() {
         }
 
         if (comboIndex < combos.length) {
-            // 還沒算完，更新進度並排程下一批
             let pct = Math.floor((comboIndex / combos.length) * 100);
             btn.innerHTML = `<i class="bi bi-arrow-repeat spin-anim"></i> 運算中... (${pct}%)`;
             requestAnimationFrame(() => setTimeout(processChunk, 0));
         } else {
-            // 算完了
             if (globalBestCombo) {
                 renderResults(targets, globalBestCombo, globalBestResults);
             } else {
                 alert("找不到符合所有限制條件的油墨組合。");
             }
             
-            // 完成動畫
             btn.innerHTML = `<i class="bi bi-check-lg"></i> 已完成`;
             btn.classList.add('btn-success');
             
             setTimeout(() => {
-                btn.innerHTML = `<i class="bi bi-cpu"></i> 分析 RISO 油墨組合`;
+                btn.innerHTML = `<i class="bi bi-clipboard-data"></i> 分析 RISO 油墨組合`;
                 btn.classList.remove('btn-success');
                 btn.disabled = false;
             }, 1500);
         }
     }
-    
-    // 開始第一批運算
     processChunk();
 }
 
@@ -504,28 +541,56 @@ function renderResults(targets, combo, results) {
         const targetHex = `#${(1 << 24 | target.rgb.r << 16 | target.rgb.g << 8 | target.rgb.b).toString(16).slice(1)}`;
         const mixedHex = `#${(1 << 24 | r.mixed.r << 16 | r.mixed.g << 8 | r.mixed.b).toString(16).slice(1)}`;
 
-        let constraintText = "";
-        if (target.limit > 0) constraintText += ` [限${target.limit}色]`;
-        if (target.forceInk) constraintText += ` [定:${target.forceInk}]`;
+        // 1. 統一在長條圖上方組裝標籤 (靠右對齊)
+        let tagsHeaderHTML = '';
+        let limitTagHTML = '';
+        let forceTagHTML = '';
+
+        // 處理「限 X 色」標籤
+        if (target.limit > 0) {
+            limitTagHTML = `<span class="r-tag tag-limit">限 ${target.limit} 色</span>`;
+        }
+
+        // 處理「指定油墨」標籤
+        if (target.forceInk) {
+            // 從總油墨庫中找出該油墨的色碼，用來決定標籤底色與文字顏色
+            const forcedInkData = RISO_INKS.find(i => i.name === target.forceInk);
+            if (forcedInkData) {
+                let textColor = getContrastYIQ(forcedInkData.hex);
+                forceTagHTML = `<span class="r-tag tag-ink" style="background: ${forcedInkData.hex}; color: ${textColor}; padding: 3px 8px;">指定 ${target.forceInk}</span>`;
+            }
+        }
+
+        // 如果有任何標籤，就用 flex 容器包起來並靠右對齊
+        if (limitTagHTML || forceTagHTML) {
+            tagsHeaderHTML = `
+                <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 8px;">
+                    ${limitTagHTML}
+                    ${forceTagHTML}
+                </div>
+            `;
+        }
 
         let itemHTML = `
             <div class="result-item">
                 <div class="compare-row">
-                    <div>
+                    <div class="preview-label-container">
                         <div class="preview-swatch" style="background: ${targetHex};"></div>
-                        <div class="preview-label">目標色 ${index+1} <br><span class="preview-sub-label">${constraintText}</span></div>
+                        <div class="preview-label">目標色 ${index+1}</div>
                     </div>
-                    <div>
+                    <div class="preview-label-container">
                         <div class="preview-swatch" style="background: ${mixedHex};"></div>
                         <div class="preview-label">模擬疊印</div>
                     </div>
                     <div class="bar-chart-container">
-        `;
+                        ${tagsHeaderHTML} `;
 
         combo.forEach((ink, idx) => {
             let pct = Math.round(r.weights[idx] * 100);
             if(pct > 0) {
                 let textColor = getContrastYIQ(ink.hex);
+                
+                // 移除了原本寫死在名稱旁邊的標籤與 inline style，恢復 CSS 原本乾淨的排版
                 itemHTML += `
                     <div class="result-bar-row">
                         <div class="result-bar-label">${ink.name}</div>
@@ -559,6 +624,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             fileNameDisplay.innerText = file.name;
+
+            // 新增：當上傳新圖片時，清除所有色票的條件限制
+            resetAllSettings();
 
             const reader = new FileReader();
             reader.onload = function(event) {

@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>RISO 油墨組合參考</title>
+    <title>RISO 油墨組合指南</title>
     <link rel="stylesheet" href="main.css">
     <script src="main.js"></script>
 
@@ -14,7 +14,7 @@
 <body>
 
     <div class="card">
-        <h1>RISO 油墨組合參考 (V2.4)</h1>
+        <h1>RISO 油墨組合指南 (V2.5)</h1>
         
         <div class="section-divider">
             <div class="library-layout">
@@ -45,7 +45,7 @@
             <div>
                 <h3 class="upload-title">從圖片擷取目標色彩</h3>
                 <div class="file-upload-wrapper">
-                    <button class="btn-secondary"><i class="bi bi-folder2-open"></i> 選擇圖片檔案</button>
+                    <button class="btn-secondary btn-upload"><i class="bi bi-folder-fill"></i> 選擇圖片檔案</button>
                     <input type="file" id="image-upload" accept="image/*">
                 </div>
                 <span id="file-name-display" class="file-name-text">尚未選擇檔案</span>
@@ -58,19 +58,21 @@
         
         <div class="target-header-row">
             <p class="target-header-text"><i class="bi bi-1-circle-fill"></i> 設定目標色彩</p>
-            <div class="target-controls">
+            <div class="target-controls" style="display: flex; gap: 0.5rem;">
+                <button onclick="resetAllSettings()" class="btn-secondary text-danger"><i class="bi bi-eraser-fill"></i> 清除所有設定</button>
                 <button onclick="addTargetColor()" id="btn-add-target" class="btn-secondary"><i class="bi bi-plus-lg"></i> 新增色票</button>
             </div>
         </div>
         
-        <div class="color-row" id="target-colors">
-            </div>
+        <div class="color-row" id="target-colors"></div>
 
-        <p class="target-header-text mt-4"><i class="bi bi-2-circle-fill"></i> 設定希望使用的 Riso 油墨總數</p>
-        
+        <div class="target-header-row">
+            <p class="target-header-text"><i class="bi bi-2-circle-fill"></i> 欲使用的 Riso 油墨總數</p>
+        </div>
         <div class="custom-dropdown limit-width-200 mb-4" id="max-inks-cd">
             <div class="cd-selected" onclick="toggleDropdown('max-inks-panel')">
                 <span id="max-inks-text" class="cd-text-grow">3 色</span>
+                <span class="cd-arrow">▼</span>
             </div>
             <div class="cd-panel" id="max-inks-panel">
                 <div class="cd-options">
