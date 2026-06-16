@@ -1,3 +1,5 @@
+let originalFullImage = null;
+
 // 1. 建立 Footer 元素 (改為 div 較符合語意)
 const footerDiv = document.createElement("div");
 footerDiv.className = "footer";
@@ -22,21 +24,36 @@ document.body.appendChild(footerDiv);
 let defaultActives = ["黑", "金", "青", "螢光粉", "赤紅", "黃", "若葉綠", "薄荷綠"];
 
 let RISO_INKS = [
-    { name: "金", hex: "#c99c65", active: defaultActives.includes("金") }, { name: "黑", hex: "#000000", active: defaultActives.includes("黑") },
-    { name: "鈍灰", hex: "#3d3d3f", active: defaultActives.includes("鈍灰") }, { name: "灰", hex: "#272727", active: defaultActives.includes("灰") },
-    { name: "白", hex: "#ffffff", active: defaultActives.includes("白") }, { name: "茶", hex: "#5c281a", active: defaultActives.includes("茶") },
-    { name: "黃土", hex: "#754a15", active: defaultActives.includes("黃土") }, { name: "水", hex: "#5196d5", active: defaultActives.includes("水") },
-    { name: "天空", hex: "#68c7eb", active: defaultActives.includes("天空") }, { name: "青", hex: "#1c6cb1", active: defaultActives.includes("青") },
-    { name: "濃紺", hex: "#283a7f", active: defaultActives.includes("濃紺") }, { name: "紫", hex: "#3c2657", active: defaultActives.includes("紫") },
-    { name: "酒紅", hex: "#671f2f", active: defaultActives.includes("酒紅") }, { name: "薰衣紫", hex: "#7259c4", active: defaultActives.includes("薰衣紫") },
-    { name: "桃粉", hex: "#ea6d87", active: defaultActives.includes("桃粉") }, { name: "赤紅", hex: "#b3181e", active: defaultActives.includes("赤紅") },
-    { name: "朱紅", hex: "#ea390e", active: defaultActives.includes("朱紅") }, { name: "橙", hex: "#f19a38", active: defaultActives.includes("橙") },
-    { name: "黃", hex: "#fef104", active: defaultActives.includes("黃") }, { name: "黄綠", hex: "#dae000", active: defaultActives.includes("黄綠") },
-    { name: "若葉綠", hex: "#00A95C", active: defaultActives.includes("若葉綠") }, { name: "濃綠", hex: "#0e525d", active: defaultActives.includes("濃綠") },
-    { name: "湖水綠", hex: "#008982", active: defaultActives.includes("湖水綠") }, { name: "薄荷綠", hex: "#5ebfc7", active: defaultActives.includes("薄荷綠") },
-    { name: "珊瑚粉", hex: "#f5b4b1", active: defaultActives.includes("珊瑚粉") }, { name: "螢光紅", hex: "#fe3741", active: defaultActives.includes("螢光紅") },
-    { name: "螢光粉", hex: "#fd59aa", active: defaultActives.includes("螢光粉") }, { name: "螢光橘", hex: "#fc5938", active: defaultActives.includes("螢光橘") },
-    { name: "螢光綠", hex: "#79fd83", active: defaultActives.includes("螢光綠") }, { name: "螢光黃", hex: "#fdff78", active: defaultActives.includes("螢光黃") }
+    { name: "金", hex: "#c99c65", active: defaultActives.includes("金") }, 
+    { name: "黑", hex: "#000000", active: defaultActives.includes("黑") },
+    { name: "鈍灰", hex: "#3d3d3f", active: defaultActives.includes("鈍灰") }, 
+    { name: "灰", hex: "#272727", active: defaultActives.includes("灰") },
+    { name: "白", hex: "#ffffff", active: defaultActives.includes("白") }, 
+    { name: "茶", hex: "#5c281a", active: defaultActives.includes("茶") },
+    { name: "黃土", hex: "#754a15", active: defaultActives.includes("黃土") }, 
+    { name: "水", hex: "#5196d5", active: defaultActives.includes("水") },
+    { name: "天空", hex: "#30afe4", active: defaultActives.includes("天空") }, 
+    { name: "青", hex: "#0368b8", active: defaultActives.includes("青") },
+    { name: "濃紺", hex: "#2a3a5b", active: defaultActives.includes("濃紺") }, 
+    { name: "紫", hex: "#3c2657", active: defaultActives.includes("紫") },
+    { name: "酒紅", hex: "#671f2f", active: defaultActives.includes("酒紅") }, 
+    { name: "薰衣紫", hex: "#7259c4", active: defaultActives.includes("薰衣紫") },
+    { name: "桃粉", hex: "#ea6d87", active: defaultActives.includes("桃粉") }, 
+    { name: "赤紅", hex: "#b3181e", active: defaultActives.includes("赤紅") },
+    { name: "朱紅", hex: "#ea390e", active: defaultActives.includes("朱紅") }, 
+    { name: "橙", hex: "#f19a38", active: defaultActives.includes("橙") },
+    { name: "黃", hex: "#fef104", active: defaultActives.includes("黃") }, 
+    { name: "黄綠", hex: "#c5d110", active: defaultActives.includes("黄綠") },
+    { name: "若葉綠", hex: "#00A95C", active: defaultActives.includes("若葉綠") }, 
+    { name: "濃綠", hex: "#0e525d", active: defaultActives.includes("濃綠") },
+    { name: "湖水綠", hex: "#008982", active: defaultActives.includes("湖水綠") }, 
+    { name: "薄荷綠", hex: "#5ebfc7", active: defaultActives.includes("薄荷綠") },
+    { name: "珊瑚粉", hex: "#f5b4b1", active: defaultActives.includes("珊瑚粉") }, 
+    { name: "螢光紅", hex: "#e6383a", active: defaultActives.includes("螢光紅") },
+    { name: "螢光粉", hex: "#fd59aa", active: defaultActives.includes("螢光粉") }, 
+    { name: "螢光橘", hex: "#ff5c3b", active: defaultActives.includes("螢光橘") },
+    { name: "螢光綠", hex: "#79fd83", active: defaultActives.includes("螢光綠") }, 
+    { name: "螢光黃", hex: "#fdff78", active: defaultActives.includes("螢光黃") }
 ];
 
 function computeInkProperties(ink) {
@@ -468,7 +485,19 @@ function addDefaultInks() {
 
 function filterArchiveInks(keyword) {
     archiveSearchKeyword = keyword.toLowerCase();
-    renderInkLibrary();
+    const archivedContainer = document.getElementById('archived-inks-display');
+    renderInkLibrary(); 
+    
+    // 新增：如果全部被過濾掉，顯示空狀態與跳轉按鈕
+    if (archivedContainer.innerHTML.trim() === '') {
+        archivedContainer.innerHTML = `
+            <div style="color:var(--text-muted); font-size:0.85rem; text-align:center; padding: 1.5rem 0; width: 100%;">
+                <i class="bi bi-droplet-half" style="font-size:1.5rem; display:block; margin-bottom:0.5rem; opacity:0.5;"></i>
+                沒有找到符合的油墨<br><br>
+                <button class="btn-secondary" style="margin: 0 auto;" onclick="goToAddInk()"><i class="bi bi-plus-lg"></i> 自訂油墨</button>
+            </div>
+        `;
+    }
 }
 
 function renderInkLibrary() {
@@ -622,31 +651,55 @@ function processImport() {
 // ==================== 油墨更新與選單同步 ====================
 function updateTargetDropdowns() {
     const activeInks = RISO_INKS.filter(ink => ink.active);
-    
-    for(let i=0; i < targetColorStates.length; i++) {
-        const optionsContainer = document.getElementById(`ink-options-${i}`);
-        if(!optionsContainer) continue; 
 
-        const currentVal = document.getElementById(`ink-val-${i}`).value;
-        let html = `<div class="cd-option" onclick="selectInk(${i}, '', '')"><span>不指定</span></div>`;
-        
-        activeInks.forEach(ink => {
-            html += `
-                <div class="cd-option" onclick="selectInk(${i}, '${ink.name}', '${ink.hex}')">
-                    <div class="cd-swatch" style="background: ${ink.hex};"></div>
-                    <span>${ink.name}</span>
+    targetColorStates.forEach((state, idx) => {
+        const inkPanel = document.getElementById(`ink-panel-${idx}`);
+        if (inkPanel) {
+            let optionsHTML = `
+                <div class="cd-header">
+                    <div class="cd-swatch" style="background: ${state.hex}"></div> 色票 ${idx + 1}
                 </div>
+                <div class="cd-search-box">
+                    <input type="text" placeholder="搜尋油墨..." oninput="filterDropdown('${idx}', this.value)" onclick="event.stopPropagation()">
+                </div>
+                <div class="cd-options dropdown-list-${idx}">
             `;
-        });
-        optionsContainer.innerHTML = html;
 
-        if (currentVal && !activeInks.find(ink => ink.name === currentVal)) {
-            selectInk(i, '', ''); 
-        } else if (currentVal) {
-             const updatedInk = activeInks.find(ink => ink.name === currentVal);
-             selectInk(i, updatedInk.name, updatedInk.hex);
+            // 新增：防呆，如果沒有油墨的畫面
+            if (activeInks.length === 0) {
+                optionsHTML += `</div>`; 
+                optionsHTML += `
+                    <div class="cd-footer" style="padding: 0.8rem; text-align: center; border-top: 1px solid var(--border-light);">
+                        <p style="font-size: 0.8rem; color: var(--danger); margin: 0 0 0.5rem 0;">無可用油墨，請先在上方加入</p>
+                        <button class="btn-secondary" style="font-size: 0.75rem; width: 100%; justify-content:center;" onclick="goToAddInk(); closePanel('ink-panel-${idx}')">前往新增</button>
+                    </div>
+                `;
+            } else {
+                optionsHTML += `
+                    <div class="cd-option" onclick="selectInk(${idx}, '', event)">
+                        <div class="cd-swatch cd-none-swatch"></div><span>不指定油墨</span>
+                    </div>
+                `;
+                activeInks.forEach(ink => {
+                    optionsHTML += `
+                        <div class="cd-option dropdown-item-${idx}" data-name="${ink.name}">
+                            <div class="cd-swatch" style="background: ${ink.hex};"></div>
+                            <span onclick="selectInk(${idx}, '${ink.name}', event)" style="flex-grow:1;">${ink.name}</span>
+                        </div>
+                    `;
+                });
+                optionsHTML += `</div>`; 
+                // 新增：選單最底下的提示區塊
+                optionsHTML += `
+                    <div class="cd-footer" style="padding: 0.8rem; text-align: center; border-top: 1px solid var(--border-light); background: var(--bg-hover);">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0 0 0.5rem 0;">找不到需要的油墨顏色嗎？</p>
+                        <button class="btn-secondary" style="font-size: 0.75rem; width:100%; justify-content:center;" onclick="goToAddInk(); closePanel('ink-panel-${idx}')">前往上方加入</button>
+                    </div>
+                `;
+            }
+            inkPanel.innerHTML = optionsHTML;
         }
-    }
+    });
 }
 
 function toggleInk(index) {
@@ -913,6 +966,13 @@ function calculateColors() {
         } else {
             if (globalBestCombo) {
                 renderResults(targets, globalBestCombo, globalBestResults);
+
+                const calcBtn = document.getElementById('calc-btn');
+                if (calcBtn) {
+                    calcBtn.innerHTML = '<i class="bi bi-clipboard-data"></i> 分析 RISO 油墨組合';
+                    calcBtn.classList.remove('loading');
+                    calcBtn.disabled = false;
+                }
                 
                 btn.innerHTML = `<i class="bi bi-check-lg"></i> 已完成`;
                 btn.classList.add('btn-success');
@@ -1023,6 +1083,23 @@ function renderResults(targets, combo, results) {
         itemHTML += `</div></div></div>`;
         resDiv.innerHTML += itemHTML;
     });
+
+    window.currentBestCombo = combo;
+    window.currentBestResults = results;
+
+    if (originalFullImage) {
+        // 假設你的結果是裝在 result-container 或類似 ID 的區塊內，請替換成你實際的 ID (例如 'result-summary' 或 'results')
+        const container = document.getElementById('result-display') || document.querySelector('.result-item').parentElement; 
+        
+        container.innerHTML += `
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px dashed var(--border-color); text-align: center;">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem;">已偵測到上傳的參考圖片，是否依照此配色方案進行分色？</p>
+                <button class="primary" id="start-sep-btn" onclick="startSeparationPreview()">
+                    <i class="bi bi-layers"></i> 開始縮圖分色預覽
+                </button>
+            </div>
+        `;
+    }
 }
 
 // ==================== 圖片色彩擷取功能 ====================
@@ -1046,6 +1123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
+                    originalFullImage = img;
                     const canvas = document.getElementById('img-canvas');
                     const ctx = canvas.getContext('2d');
                     
@@ -1226,3 +1304,267 @@ function extractDominantColors() {
         yearSpan.textContent = yearText;
     }
 })();
+
+// 跳轉到上方自訂油墨區塊的輔助函式
+function goToAddInk() {
+    document.querySelector('.add-ink-form').classList.add('show-mobile-flex');
+    document.getElementById('form-ink-name').focus();
+    window.scrollTo({ top: document.querySelector('.add-ink-form').offsetTop - 50, behavior: 'smooth' });
+}
+
+// =================================================================
+// 以下為全新加入的功能：圖片點擊取樣編輯器 & PSD 分色黑稿匯出
+// =================================================================
+
+let currentSamplerTarget = 0;
+
+function openSamplerModal() {
+    if(!originalFullImage) return;
+    document.getElementById('sampler-modal').classList.remove('hidden');
+    const canvas = document.getElementById('sampler-canvas');
+    canvas.width = originalFullImage.width;
+    canvas.height = originalFullImage.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(originalFullImage, 0, 0);
+
+    renderSamplerToolbar();
+    selectSamplerTarget(0); 
+}
+
+function renderSamplerToolbar() {
+    const toolbar = document.getElementById('sampler-toolbar');
+    toolbar.innerHTML = '';
+    targetColorStates.forEach((tc, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `sampler-target-btn ${currentSamplerTarget === idx ? 'active' : ''}`;
+        btn.style = `border: 2px solid ${currentSamplerTarget === idx ? '#10b981' : 'transparent'}; border-radius: 6px; padding: 6px; cursor: pointer; background: var(--bg-card); box-shadow: 0 1px 3px rgba(0,0,0,0.1); display:flex; flex-direction:column; align-items:center; min-width:60px;`;
+        btn.innerHTML = `<div style="width: 30px; height: 30px; background: ${tc.hex}; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1);"></div><div style="font-size: 0.75rem; margin-top:4px; font-weight:600;">色票 ${idx+1}</div>`;
+        btn.onclick = () => selectSamplerTarget(idx);
+        toolbar.appendChild(btn);
+    });
+}
+
+function selectSamplerTarget(idx) {
+    currentSamplerTarget = idx;
+    renderSamplerToolbar();
+}
+
+// 點擊圖片取樣功能
+document.getElementById('sampler-canvas').addEventListener('click', function(e) {
+    if(!originalFullImage) return;
+    const rect = this.getBoundingClientRect();
+    const scaleX = this.width / rect.width;
+    const scaleY = this.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+
+    const ctx = this.getContext('2d');
+    const pixel = ctx.getImageData(x, y, 1, 1).data;
+    const hex = "#" + (1 << 24 | pixel[0] << 16 | pixel[1] << 8 | pixel[2]).toString(16).slice(1);
+    
+    // 更新指定色票，並清空該色票的油墨限制
+    targetColorStates[currentSamplerTarget].hex = hex;
+    targetColorStates[currentSamplerTarget].limit = 0;
+    targetColorStates[currentSamplerTarget].forceInk = "";
+
+    renderTargetBoxes();
+    renderSamplerToolbar();
+
+    // 觸發外部色票閃爍 Focus 提示
+    const box = document.getElementById(`target-box-${currentSamplerTarget}`);
+    if(box) {
+        box.classList.remove('flash-anim');
+        void box.offsetWidth;
+        box.classList.add('flash-anim');
+    }
+});
+
+function closeSamplerModal() { document.getElementById('sampler-modal').classList.add('hidden'); }
+
+
+// =================================================================
+// 全新分色邏輯：縮圖預覽 ＆ 高畫質原尺寸下載
+// =================================================================
+
+// 1. 點擊按鈕後，觸發預覽分色
+function startSeparationPreview() {
+    const btn = document.getElementById('start-sep-btn');
+    btn.innerHTML = '<i class="bi bi-hourglass-split spin-anim"></i> 分色運算中...';
+    btn.disabled = true;
+
+    // 延遲 50ms 讓畫面有時間更新 Loading 按鈕
+    setTimeout(() => {
+        // 傳入 true 代表是預覽，會強制把圖片寬度縮小到 800px 以內運算
+        generateSeparations(window.currentBestCombo, window.currentBestResults, true); 
+        btn.style.display = 'none'; // 算完就隱藏按鈕
+    }, 50);
+}
+
+// 2. 核心分色演算法（供預覽與高畫質下載共用）
+function processImageSeparation(imgSource, combo, results, maxWidth = null) {
+    let w = imgSource.width;
+    let h = imgSource.height;
+
+    // 如果有設定最大寬度（預覽用），則等比例縮小以節省效能
+    if (maxWidth && w > maxWidth) {
+        h = Math.round((h * maxWidth) / w);
+        w = maxWidth;
+    }
+
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = w; tempCanvas.height = h;
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.drawImage(imgSource, 0, 0, w, h);
+    const imgData = tempCtx.getImageData(0, 0, w, h);
+    const pixels = imgData.data;
+
+    const inkData = combo.map(() => new Uint8Array(w * h));
+
+    for (let i = 0; i < pixels.length; i += 4) {
+        const r = pixels[i], g = pixels[i+1], b = pixels[i+2], a = pixels[i+3];
+        if (a === 0) continue; 
+        
+        let minDist = Infinity;
+        let targetIndex = 0;
+        for (let k = 0; k < targetColorStates.length; k++) {
+            const tcHex = targetColorStates[k].hex;
+            const dist = Math.pow(r - parseInt(tcHex.slice(1,3),16), 2) + Math.pow(g - parseInt(tcHex.slice(3,5),16), 2) + Math.pow(b - parseInt(tcHex.slice(5,7),16), 2);
+            if (dist < minDist) { minDist = dist; targetIndex = k; }
+        }
+
+        const weights = results[targetIndex].weights;
+        const pLum = 255 - (r + g + b) / 3;
+        const tcHex = targetColorStates[targetIndex].hex;
+        const tLum = 255 - (parseInt(tcHex.slice(1,3),16) + parseInt(tcHex.slice(3,5),16) + parseInt(tcHex.slice(5,7),16)) / 3;
+        const ratio = tLum === 0 ? 0 : (pLum / tLum);
+
+        const pixelIndex = i / 4;
+        for (let j = 0; j < combo.length; j++) {
+            let val = weights[j] * ratio * 255;
+            inkData[j][pixelIndex] = Math.min(255, Math.max(0, val));
+        }
+    }
+
+    const canvases = [];
+    combo.forEach((ink, idx) => {
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const ctx = c.getContext('2d');
+        const outData = ctx.createImageData(w, h);
+        
+        for(let p=0; p<w*h; p++) {
+            outData.data[p*4] = 0;
+            outData.data[p*4+1] = 0;
+            outData.data[p*4+2] = 0;
+            outData.data[p*4+3] = inkData[idx][p]; 
+        }
+        ctx.putImageData(outData, 0, 0);
+        canvases.push({ ink: ink, canvas: c, w: w, h: h });
+    });
+
+    return canvases;
+}
+
+// 3. 將縮圖預覽繪製到畫面上
+function generateSeparations(combo, results, isPreview = true) {
+    if (!originalFullImage) return;
+    const step3 = document.getElementById('step3-section');
+    step3.classList.remove('hidden');
+    const container = document.getElementById('separation-previews');
+    
+    // 呼叫演算法，並強制將寬度縮放到 800px 以下
+    window.previewCanvases = processImageSeparation(originalFullImage, combo, results, 800);
+    container.innerHTML = '';
+
+    window.previewCanvases.forEach((sep, idx) => {
+        container.innerHTML += `
+            <div class="sep-preview-item">
+                <div style="background:${sep.ink.hex}; height:10px; width:100%; border-radius:4px 4px 0 0;"></div>
+                <canvas class="sep-canvas" id="preview-cvs-${idx}"></canvas>
+                <p style="font-weight:600; margin:0.8rem 0 0.5rem;">${sep.ink.name} 版</p>
+                <div style="display:flex; gap:0.5rem; width:100%;">
+                    <button class="btn-secondary" style="flex:1; font-size:0.8rem; justify-content:center;" onclick="downloadSeparation(${idx}, 'png', this)">原圖 PNG</button>
+                    <button class="btn-secondary" style="flex:1; font-size:0.8rem; justify-content:center;" onclick="downloadSeparation(${idx}, 'jpg', this)">原圖 JPG</button>
+                </div>
+            </div>
+        `;
+    });
+
+    window.previewCanvases.forEach((sep, idx) => {
+        const pc = document.getElementById(`preview-cvs-${idx}`);
+        pc.width = sep.w; pc.height = sep.h;
+        pc.getContext('2d').drawImage(sep.canvas, 0, 0);
+    });
+}
+
+// 4. 下載圖片：點擊時才使用原圖運算
+function downloadSeparation(idx, type, btnElement) {
+    const originalText = btnElement.innerHTML;
+    btnElement.innerHTML = '<i class="bi bi-hourglass spin-anim"></i> 運算中...';
+    btnElement.disabled = true;
+
+    setTimeout(() => {
+        // 傳入 null 代表不縮圖，使用原圖高畫質運算
+        const highResCanvases = processImageSeparation(originalFullImage, window.currentBestCombo, window.currentBestResults, null);
+        const sep = highResCanvases[idx];
+        
+        const a = document.createElement('a');
+        if(type === 'png') {
+            a.href = sep.canvas.toDataURL('image/png');
+            a.download = `RISO_K_${sep.ink.name}_HighRes.png`;
+        } else {
+            const temp = document.createElement('canvas');
+            temp.width = sep.w; temp.height = sep.h;
+            const ctx = temp.getContext('2d');
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0,0,sep.w,sep.h);
+            ctx.drawImage(sep.canvas, 0, 0);
+            a.href = temp.toDataURL('image/jpeg', 0.9);
+            a.download = `RISO_K_${sep.ink.name}_HighRes.jpg`;
+        }
+        a.click();
+
+        btnElement.innerHTML = originalText;
+        btnElement.disabled = false;
+    }, 50);
+}
+
+// 5. 下載 PSD：同樣點擊時才使用原圖運算
+function downloadPSD() {
+    if(!window.agPsd) return alert('缺少分色模組，請確認網路連線。');
+    
+    const btnElement = document.querySelector('.btn-psd');
+    const originalText = btnElement.innerHTML;
+    btnElement.innerHTML = '<i class="bi bi-hourglass spin-anim"></i> 產生高畫質 PSD 中...';
+    btnElement.disabled = true;
+
+    setTimeout(() => {
+        // 使用原圖高畫質運算 PSD 圖層
+        const highResCanvases = processImageSeparation(originalFullImage, window.currentBestCombo, window.currentBestResults, null);
+        
+        const layers = highResCanvases.map(sep => {
+            const c = document.createElement('canvas');
+            c.width = sep.w; c.height = sep.h;
+            c.getContext('2d').drawImage(sep.canvas, 0, 0);
+            return { name: `${sep.ink.name} K版`, canvas: c, blendMode: 'multiply' };
+        });
+
+        const bg = document.createElement('canvas');
+        bg.width = highResCanvases[0].w; bg.height = highResCanvases[0].h;
+        const bgCtx = bg.getContext('2d');
+        bgCtx.fillStyle = '#ffffff'; bgCtx.fillRect(0,0,bg.width,bg.height);
+        layers.push({ name: '白紙底色', canvas: bg });
+
+        const psd = { width: highResCanvases[0].w, height: highResCanvases[0].h, children: layers.reverse() };
+        const buffer = window.agPsd.writePsd(psd);
+        const blob = new Blob([buffer], { type: 'application/octet-stream' });
+        
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `RISO_分離輸出_HighRes.psd`;
+        a.click();
+
+        btnElement.innerHTML = originalText;
+        btnElement.disabled = false;
+    }, 50);
+}

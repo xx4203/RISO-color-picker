@@ -171,6 +171,105 @@ button.btn-success { background: var(--success) !important; }
     font-size: 1.2rem;
 }
 
+
+/* --- 互動編輯與步驟三專用樣式 --- */
+#img-canvas { cursor: pointer; transition: 0.2s ease; }
+#img-canvas:hover { opacity: 0.7; box-shadow: 0 0 8px rgba(0,0,0,0.2); }
+
+.sampler-target-btn { transition: all 0.2s; }
+.sampler-target-btn:hover { background: #e2e8f0 !important; }
+
+.sep-preview-item { background: var(--bg-light); border: 1px solid var(--border-light); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; align-items: center; }
+.sep-canvas { max-width: 100%; height: auto; background: #fff; border: 1px solid #ccc; background-image: repeating-conic-gradient(#f4f4f5 0% 25%, #ffffff 0% 50%); background-size: 16px 16px; margin-bottom: 0.5rem; }
+
+/* 搜尋空狀態與標頭 */
+.cd-header { padding: 0.6rem; background: var(--bg-hover); border-bottom: 1px solid var(--border-light); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem;}
+
+/* =========================================
+   互動取樣編輯器 Modal 樣式
+========================================= */
+#sampler-modal {
+    z-index: 9999;
+}
+
+.sampler-modal-content {
+    max-width: 90vw;
+    width: 100rem;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem;
+}
+
+.sampler-title {
+    margin: 0;
+}
+
+.sampler-subtitle {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    font-weight: normal;
+}
+
+.sampler-close-btn {
+    font-size: 1.8rem;
+}
+
+.sampler-canvas-container {
+    flex-grow: 1;
+    overflow: auto;
+    text-align: center;
+    border: 1px dashed var(--border-color);
+    cursor: crosshair;
+    background: #eee;
+}
+
+#sampler-canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+#sampler-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+/* =========================================
+   步驟三：分色結果匯出區塊樣式
+========================================= */
+#step3-section {
+    margin-top: 2rem;
+    border: 2px solid var(--primary);
+}
+
+.step3-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.psd-btn-container {
+    margin-bottom: 1rem;
+}
+
+.btn-psd {
+    background: #0369a1;
+}
+
+.btn-psd:hover {
+    background: #0284c7; /* 補上一個好看的 Hover 狀態 */
+}
+
+#separation-previews {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+
 /* ========================================= */
 /* 9. Footer */
 /* ========================================= */
@@ -182,6 +281,7 @@ button.btn-success { background: var(--success) !important; }
 .footer-social-link a { overflow: visible; display: block; }
 .footer-social-link i { padding: 1rem; font-size: 1.5rem; color: var(--text-muted);}
 #back-top { font-size: 2.5rem; margin: 4.8rem; color: var(--text-muted);}
+
 
 /* ========================================= */
 /* 10. 響應式：平板與手機端 (860px 斷點) */
@@ -287,9 +387,10 @@ button.btn-success { background: var(--success) !important; }
     }
     .modal-btn-row, .modal-actions { flex-direction: column; }
     .modal-actions button { width: 100%; justify-content: center; }
-    .cd-panel { z-index: 1000; position: fixed; top: auto !important; bottom: 0; left: 0; width: 100vw; max-height: 60vh; border-radius: 1.5rem 1.5rem 0 0; box-shadow: 0 -0.5rem 2.5rem var(--shadow-xl); z-index: 9999; border: none; padding-bottom: env(safe-area-inset-bottom, 1.5rem); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    .cd-panel { z-index: 1000; position: fixed; top: auto !important; bottom: 0; left: 0; width: 100vw; max-height: 60vh; border-radius: 1.5rem 1.5rem 0 0; box-shadow: 0 -0.5rem 2.5rem var(--shadow-xl); z-index: 9999; border: none; padding-bottom: env(safe-area-inset-bottom, 1.5rem); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); height: 60vh !important; display: flex; flex-direction: column;}
     .cd-search-box { padding: 1.5rem; }
-    .cd-options { max-height: calc(60vh - 8rem); }
+    .cd-options { max-height: calc(60vh - 8rem); flex-grow: 1; overflow-y: auto;}
     .cd-option { padding: 1.5rem 1.5rem; font-size: 1.5rem; }
+    .cd-search-box, .cd-footer, .cd-header { flex-shrink: 0; }
 }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
